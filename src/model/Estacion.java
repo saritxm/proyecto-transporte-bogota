@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 public class Estacion {
     private final String id;
     private String nombre;

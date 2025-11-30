@@ -1,0 +1,44 @@
+id,nombre,tipo,latitud,longitud,capacidad
+E001,Autopista Sur,metro,4.5708,-74.1374,3000
+E002,Llano de Gaitán,metro,4.5792,-74.1351,3000
+E003,Manitas,metro,4.5881,-74.1327,3000
+E004,Nariño,metro,4.5944,-74.1304,3500
+E005,Hospitales,metro,4.6011,-74.1280,3500
+E006,1 de Mayo,metro,4.6089,-74.1256,4000
+E007,Calle 40 Sur,metro,4.6167,-74.1232,4000
+E008,Santa Lucía,metro,4.6245,-74.1208,4500
+E009,Fucha,metro,4.6323,-74.1184,4500
+E010,NQS,metro,4.6401,-74.1160,5000
+E011,Comuneros,metro,4.6479,-74.1136,5000
+E012,Restrepo,metro,4.6557,-74.1112,5500
+E013,Avenida Caracas,metro,4.6635,-74.1088,6000
+E014,Calle 12 Sur,metro,4.6713,-74.1064,6000
+E015,Calle 10,metro,4.6791,-74.1040,6500
+TM001,Portal Sur,tm,4.5612,-74.1398,8000
+TM002,Portal Américas,tm,4.6254,-74.1456,8000
+TM003,Portal 80,tm,4.7234,-74.1123,8000
+TM004,Portal Tunal,tm,4.5789,-74.1234,8000
+TM005,Calle 40 Sur TransMilenio,tm,4.6167,-74.1245,5000
+TM006,NQS Calle 75 Sur,tm,4.6389,-74.1178,5000
+TM007,NQS Calle 45 Sur,tm,4.6512,-74.1156,5000
+TM008,Ricaurte,tm,4.6423,-74.1089,4500
+TM009,Carrera 53,tm,4.6734,-74.1234,4500
+TM010,Ciudad Universitaria,tm,4.6389,-74.0834,5000
+TM011,Calle 76,tm,4.6734,-74.0689,5500
+TM012,Calle 100,tm,4.6923,-74.0645,6000
+TM013,Calle 127,tm,4.7089,-74.0601,6500
+TM014,Calle 142,tm,4.7234,-74.0567,7000
+TM015,Mazurén,tm,4.7389,-74.0523,7500
+SITP001,Usme Centro,sitp,4.5623,-74.1289,2000
+SITP002,Ciudad Bolívar,sitp,4.5456,-74.1523,2000
+SITP003,Soacha,sitp,4.5789,-74.2156,2500
+SITP004,Kennedy,sitp,4.6234,-74.1567,3000
+SITP005,Fontibón,sitp,4.6789,-74.1389,3000
+SITP006,Engativá,sitp,4.7012,-74.1156,3500
+SITP007,Suba,sitp,4.7456,-74.0812,3500
+SITP008,Usaquén,sitp,4.7234,-74.0345,3000
+SITP009,Chapinero,sitp,4.6523,-74.0623,2500
+SITP010,Teusaquillo,sitp,4.6389,-74.0845,2500
+INT001,Calle 40 Sur Intermodal,intermodal,4.6167,-74.1232,6000
+INT002,NQS Intermodal,intermodal,4.6401,-74.1160,7000
+INT003,Portal Norte,intermodal,4.7456,-74.0534,9000
