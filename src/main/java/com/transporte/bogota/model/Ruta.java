@@ -11,7 +11,7 @@ public class Ruta {
     private int tiempoViaje;    // en minutos
     private int capacidad;      // capacidad del vehículo/tramo (pasajeros por intervalo)
     private double distanciaM;  // distancia en metros
-
+    private List<Map<String, Double>> polyline;
     public Ruta() {
     }
 

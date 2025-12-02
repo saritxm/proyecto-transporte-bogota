@@ -3,279 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Transporte Público - Bogotá</title>
-
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
+    <title>Reporte de Optimización de Transporte - Bogotá</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .container {
-            display: flex;
-            height: calc(100vh - 100px);
-        }
-
-        .sidebar {
-            width: 350px;
-            background: white;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-
+        /* Estilos personalizados para el mapa */
         #map {
-            flex: 1;
             height: 100%;
-        }
-
-        .control-group {
-            margin-bottom: 25px;
-        }
-
-        .control-group h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 5px;
-        }
-
-        select, button {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        select {
-            background: white;
-            cursor: pointer;
-        }
-
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .stat-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .result-box {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-        .result-box h4 {
-            color: #2e7d32;
-            margin-bottom: 10px;
-        }
-
-        .result-box p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .station-list {
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 13px;
-            margin-top: 10px;
-        }
-
-        .station-item {
-            padding: 5px;
-            background: white;
-            margin: 3px 0;
-            border-radius: 3px;
-            border-left: 3px solid #667eea;
-            padding-left: 10px;
-        }
-
-        .legend {
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
-
-        .legend-item {
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            background-color: #e5e7eb; /* Placeholder color */
             display: flex;
             align-items: center;
-            margin: 8px 0;
-            font-size: 13px;
+            justify-content: center;
+            font-weight: bold;
+            color: #4b5563;
         }
-
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #667eea;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+        /* Estilo para los selectores mejorados */
+        .select-custom {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236B7280'%3E%3Cpath d='M7 7l3 3 3-3m0 6l-3-3-3 3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em;
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>🚇 Sistema de Transporte Público de Bogotá</h1>
-        <p>Optimización de rutas - Metro, TransMilenio y SITP</p>
-    </div>
+<body class="bg-gray-50 font-sans">
 
-    <div class="container">
-        <div class="sidebar">
-            <div class="control-group">
-                <h3>📊 Estadísticas del Sistema</h3>
-                <div class="stats-grid" id="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">-</div>
-                        <div class="stat-label">Estaciones</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">-</div>
-                        <div class="stat-label">Rutas</div>
-                    </div>
+    <!-- Encabezado de la Aplicación -->
+    <header class="bg-indigo-700 text-white shadow-lg p-4">
+        <div class="container mx-auto flex items-center">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.8a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <h1 class="text-xl font-bold">Sistema de Análisis y Optimización de Transporte Público de Bogotá</h1>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Columna de Controles y Reportes (Izquierda) -->
+        <div class="lg:col-span-1 space-y-6">
+
+            <!-- Estadísticas del Sistema -->
+            <div id="stats-section" class="bg-white p-6 rounded-lg shadow-xl">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+                    Estadísticas Clave
+                </h2>
+                <div id="stats-grid" class="grid grid-cols-2 gap-4">
+                    <!-- Los datos se inyectarán aquí -->
                 </div>
             </div>
 
-            <div class="control-group">
-                <h3>🔍 Calcular Ruta Óptima</h3>
-                <select id="origen">
-                    <option value="">Seleccione origen...</option>
-                </select>
-                <select id="destino">
-                    <option value="">Seleccione destino...</option>
-                </select>
-                <button id="calcular-btn" onclick="calcularRuta()">Calcular Ruta Más Corta</button>
-
-                <div id="resultado" style="display: none;"></div>
-            </div>
-
-            <div class="control-group">
-                <h3>🗺️ Leyenda</h3>
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #2196F3;"></div>
-                        <span>Metro</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #F44336;"></div>
-                        <span>TransMilenio</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #4CAF50;"></div>
-                        <span>SITP</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #FF9800;"></div>
-                        <span>Intermodal</span>
-                    </div>
+            <!-- 1. Ruta Óptima (Dijkstra) - Única Función Interactiva -->
+            <div id="dijkstra-controls" class="bg-white p-6 rounded-lg shadow-xl">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-8a1 1 0 000 2h2a1 1 0 100-2h-2z" clip-rule="evenodd"></path></svg>
+                    Ruta Óptima (Dijkstra)
+                </h2>
+                <div class="space-y-3">
+                    <select id="select-origen" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 select-custom">
+                        <option value="" disabled selected>Seleccione Origen</option>
+                    </select>
+                    <select id="select-destino" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 select-custom">
+                        <option value="" disabled selected>Seleccione Destino</option>
+                    </select>
+                    <button id="btn-calcular-ruta" class="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 transition duration-150 shadow-md disabled:bg-indigo-400" disabled>
+                        Calcular Ruta Más Corta
+                    </button>
+                    <div id="dijkstra-result" class="mt-4 text-sm font-medium text-gray-600"></div>
                 </div>
             </div>
+            
+            <!-- Indicador de Carga/Mensajes -->
+            <div id="message-area" class="text-center p-3 text-sm rounded-md transition-opacity duration-300 hidden"></div>
 
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Cargando datos...</p>
-            </div>
         </div>
 
-        <div id="map"></div>
+        <!-- Columna de Mapa y Resultados (Derecha) -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Mapa del Sistema (Placeholder) -->
+            <div class="h-96">
+                <div id="map">
+                    Visualización de la Red de Transporte y la Ruta Óptima Calculada
+                </div>
+            </div>
+
+            <!-- 2. Reporte de Análisis de Optimización (Resultados Estáticos) -->
+            <div id="analysis-report" class="bg-white p-6 rounded-lg shadow-xl">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 001-1h1a1 1 0 001 1h3a1 1 0 001-1h1a1 1 0 001 1 2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                    Reporte de Optimización de Infraestructura
+                </h2>
+                
+                <!-- Resultados del Coloreado de Grafos -->
+                <div id="coloring-result" class="border-b pb-4 mb-4">
+                    <h3 class="font-medium text-gray-800 flex items-center mb-2">
+                        <span class="text-red-500 mr-2">•</span> Coloreado de Grafos (Planificación de Recursos)
+                    </h3>
+                    <ul class="list-disc list-inside ml-4 text-sm text-gray-600 space-y-1">
+                        <li>Cargando resultados de análisis...</li>
+                    </ul>
+                </div>
+
+                <!-- Resultados del Flujo Máximo -->
+                <div id="maxflow-result" class="border-b pb-4 mb-4">
+                    <h3 class="font-medium text-gray-800 flex items-center mb-2">
+                        <span class="text-orange-500 mr-2">•</span> Flujo Máximo (Análisis de Congestión)
+                    </h3>
+                    <ul class="list-disc list-inside ml-4 text-sm text-gray-600 space-y-1">
+                        <li>Cargando resultados de análisis...</li>
+                    </ul>
+                </div>
+
+                <!-- Resultados del ARM -->
+                <div id="arm-result" class="pb-2">
+                    <h3 class="font-medium text-gray-800 flex items-center mb-2">
+                        <span class="text-purple-500 mr-2">•</span> Árbol de Recubrimiento Mínimo (Conexiones Esenciales)
+                    </h3>
+                    <ul class="list-disc list-inside ml-4 text-sm text-gray-600 space-y-1">
+                        <li>Cargando resultados de análisis...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Script de Interacción -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const endpointBase = '/api/transporte'; 
+            const messageArea = document.getElementById('message-area');
+            
+            const selects = {
+                origen: document.getElementById('select-origen'),
+                destino: document.getElementById('select-destino')
+            };
+            const btnCalcular = document.getElementById('btn-calcular-ruta');
+            const resultDijkstra = document.getElementById('dijkstra-result');
 
-    <script src="app.js"></script>
+            // --- Funciones de Utilidad ---
+            function showMessage(text, isError = false) {
+                messageArea.textContent = text;
+                messageArea.className = isError 
+                    ? 'text-center p-3 text-sm rounded-md bg-red-100 text-red-700 transition-opacity duration-300'
+                    : 'text-center p-3 text-sm rounded-md bg-green-100 text-green-700 transition-opacity duration-300';
+                messageArea.classList.remove('hidden');
+                setTimeout(() => {
+                    messageArea.classList.add('hidden');
+                }, 5000);
+            }
+
+            function renderAnalysisResults(results) {
+                const renderList = (id, data) => {
+                    const ul = document.querySelector(`#${id} ul`);
+                    ul.innerHTML = '';
+                    if (data && Array.isArray(data)) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            if (item.key === 'error') {
+                                li.className = 'text-red-500 font-bold';
+                                li.textContent = `[ERROR] ${item.value}`;
+                            } else {
+                                li.textContent = `${item.key.charAt(0).toUpperCase() + item.key.slice(1)}: ${item.value}`;
+                            }
+                            ul.appendChild(li);
+                        });
+                    } else {
+                        ul.innerHTML = '<li>No hay resultados de análisis disponibles.</li>';
+                    }
+                };
+
+                renderList('coloring-result', results.coloring);
+                renderList('maxflow-result', results.maxFlow);
+                renderList('arm-result', results.arm);
+            }
+            
+            function renderStats(stats) {
+                const grid = document.getElementById('stats-grid');
+                grid.innerHTML = '';
+                
+                const statsMap = {
+                    totalEstaciones: { label: 'Estaciones', unit: '' },
+                    totalRutas: { label: 'Rutas', unit: '' },
+                    totalLineas: { label: 'Líneas', unit: '' },
+                    capacidadTotal: { label: 'Capacidad Total', unit: 'K' }
+                };
+
+                Object.keys(statsMap).forEach(key => {
+                    if (stats[key] !== undefined) {
+                        const item = statsMap[key];
+                        const displayValue = (item.unit === 'K' && stats[key] > 1000) ? `${(stats[key] / 1000).toFixed(0)}K` : stats[key];
+                        
+                        const div = document.createElement('div');
+                        div.className = 'bg-indigo-50 p-4 rounded-xl text-center shadow-sm';
+                        div.innerHTML = `
+                            <p class="text-2xl font-bold text-indigo-700">${displayValue}</p>
+                            <p class="text-xs text-gray-500 uppercase">${item.label}</p>
+                        `;
+                        grid.appendChild(div);
+                    }
+                });
+            }
+
+            // --- Carga Inicial de Datos ---
+            async function loadInitialData() {
+                try {
+                    const [estacionesResponse, statsResponse, analysisResponse] = await Promise.all([
+                        fetch(`${endpointBase}/estaciones`),
+                        fetch(`${endpointBase}/estadisticas`),
+                        fetch(`${endpointBase}/analysis`)
+                    ]);
+
+                    if (!estacionesResponse.ok || !statsResponse.ok || !analysisResponse.ok) {
+                        throw new Error("Una de las respuestas del servidor no fue OK.");
+                    }
+
+                    const estaciones = await estacionesResponse.json();
+                    const stats = await statsResponse.json();
+                    const analysis = await analysisResponse.json();
+
+                    // 1. Llenar Selectores
+                    estaciones.forEach(e => {
+                        const optionOrigen = new Option(`${e.nombre} (${e.id})`, e.id);
+                        const optionDestino = new Option(`${e.nombre} (${e.id})`, e.id);
+                        selects.origen.add(optionOrigen);
+                        selects.destino.add(optionDestino);
+                    });
+                    
+                    // Habilitar el botón después de cargar las estaciones
+                    btnCalcular.disabled = false;
+
+                    // 2. Renderizar Estadísticas
+                    renderStats(stats);
+
+                    // 3. Renderizar Reporte de Análisis (ARM, Max Flow, Coloreado)
+                    renderAnalysisResults(analysis);
+
+                    showMessage("Datos del sistema cargados correctamente.");
+                } catch (error) {
+                    console.error("Error cargando datos iniciales:", error);
+                    showMessage(`Error al cargar datos del sistema. ${error.message}`, true);
+                }
+            }
+
+            // --- Manejador de Cálculo de Ruta (Dijkstra) ---
+            btnCalcular.addEventListener('click', async () => {
+                const origenId = selects.origen.value;
+                const destinoId = selects.destino.value;
+                
+                if (!origenId || !destinoId) {
+                    showMessage("Por favor, selecciona estación de origen y destino.", true);
+                    return;
+                }
+                
+                if (origenId === destinoId) {
+                    showMessage("Origen y destino deben ser diferentes.", true);
+                    return;
+                }
+
+                btnCalcular.disabled = true;
+                btnCalcular.textContent = 'Calculando...';
+                resultDijkstra.innerHTML = 'Buscando la ruta óptima...';
+
+                try {
+                    const response = await fetch(`${endpointBase}/ruta-optima?origenId=${origenId}&destinoId=${destinoId}`);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                         throw new Error(`Error en el servicio: ${response.status} - ${errorText.substring(0, 150)}...`);
+                    }
+
+                    const resultado = await response.json();
+                    
+                    if (resultado.tiempoTotal === 1.7976931348623157e308 || resultado.tiempoTotal === -1 || resultado.camino.length === 0) {
+                        // El valor 1.79...e308 es Double.POSITIVE_INFINITY en Java
+                        resultDijkstra.innerHTML = `
+                            <div class="space-y-2 p-3 bg-red-50 rounded-md border border-red-200">
+                                <p class="font-bold text-red-700">Ruta no Encontrada</p>
+                                <p class="text-sm text-gray-700">Las estaciones seleccionadas no están conectadas.</p>
+                            </div>
+                        `;
+                        showMessage("Ruta no encontrada.", true);
+                    } else {
+                        // Renderizar el resultado
+                        resultDijkstra.innerHTML = `
+                            <div class="space-y-2 p-3 bg-green-50 rounded-md border border-green-200">
+                                <p class="font-bold text-green-700">Tiempo Total Estimado: <span class="text-2xl">${resultado.tiempoTotal.toFixed(2)} min</span></p>
+                                <p class="text-sm text-gray-700">Estaciones Visitadas: ${resultado.numeroEstaciones}</p>
+                                <p class="text-xs text-gray-500">Camino: ${resultado.camino.map(e => e.nombre).join(' → ')}</p>
+                            </div>
+                        `;
+                        showMessage("Ruta óptima calculada con éxito.");
+                    }
+
+
+                } catch (error) {
+                    console.error("Error al calcular la ruta:", error);
+                    resultDijkstra.innerHTML = `
+                        <p class="text-red-600 font-medium">Error al calcular la ruta:</p>
+                        <p class="text-xs text-red-500">${error.message || "Asegúrate de que las estaciones estén conectadas y de que Dijkstra esté funcionando."}</p>
+                    `;
+                    showMessage("Error al calcular la ruta. Revisa la consola para detalles.", true);
+                } finally {
+                    btnCalcular.disabled = false;
+                    btnCalcular.textContent = 'Calcular Ruta Más Corta';
+                }
+            });
+
+            // Iniciar la carga de datos
+            loadInitialData();
+        });
+    </script>
 </body>
 </html>

@@ -13,7 +13,8 @@ import java.util.Map;
 
 /**
  * Controlador REST para el sistema de transporte.
- * Expone endpoints para consultar estaciones, rutas y calcular caminos óptimos.
+ * Expone endpoints para consultar datos y los resultados de los algoritmos 
+ * de optimización (Dijkstra, Max Flow, ARM, Coloreado).
  */
 @RestController
 @RequestMapping("/api")
@@ -25,6 +26,10 @@ public class TransporteController {
     public TransporteController(TransporteService transporteService) {
         this.transporteService = transporteService;
     }
+
+    // =========================================================================
+    // ENDPOINTS DE DATOS EXISTENTES
+    // =========================================================================
 
     /**
      * GET /api/estaciones - Obtiene todas las estaciones
@@ -71,21 +76,6 @@ public class TransporteController {
     }
 
     /**
-     * GET /api/ruta-optima?origen={id}&destino={id} - Calcula la ruta más corta
-     */
-    @GetMapping("/ruta-optima")
-    public ResponseEntity<Map<String, Object>> calcularRutaOptima(
-            @RequestParam String origen,
-            @RequestParam String destino) {
-        try {
-            Map<String, Object> resultado = transporteService.calcularRutaOptima(origen, destino);
-            return ResponseEntity.ok(resultado);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
      * GET /api/estadisticas - Obtiene estadísticas del sistema
      */
     @GetMapping("/estadisticas")
@@ -102,5 +92,63 @@ public class TransporteController {
             "status", "UP",
             "service", "Sistema de Transporte Bogotá"
         ));
+    }
+
+
+    // =========================================================================
+    // ENDPOINTS DE ALGORITMOS (OPTIMIZACIÓN)
+    // =========================================================================
+
+    /**
+     * GET /api/ruta-optima?origen={id}&destino={id} - Calcula la ruta más corta (Dijkstra)
+     */
+    @GetMapping("/ruta-optima")
+    public ResponseEntity<Map<String, Object>> calcularRutaOptima(
+            @RequestParam String origen,
+            @RequestParam String destino) {
+        try {
+            // El método en Service es 'calcularRutaOptima'
+            Map<String, Object> resultado = transporteService.calcularRutaOptima(origen, destino);
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/flujo-maximo?origen={id}&destino={id} - Calcula el Flujo Máximo (Edmonds-Karp)
+     * Utilizado para identificar la capacidad máxima y cuellos de botella entre dos puntos.
+     */
+    @GetMapping("/flujo-maximo")
+    public ResponseEntity<Map<String, Object>> getFlujoMaximo( // Renombrado a 'getFlujoMaximo'
+            @RequestParam String origen,
+            @RequestParam String destino) {
+        try {
+            // El método en Service es 'analizarCongestion'
+            Map<String, Object> resultado = transporteService.analizarCongestion(origen, destino); 
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/arm - Calcula el Árbol de Recubrimiento Mínimo (Kruskal)
+     * Identifica las rutas esenciales para conectar toda la red con el tiempo de viaje mínimo total.
+     */
+    @GetMapping("/arm")
+    public ResponseEntity<List<Map<String, Object>>> getARM() {
+        // El método en Service es 'calcularARM'
+        return ResponseEntity.ok(transporteService.calcularARM());
+    }
+
+    /**
+     * GET /api/coloreado - Aplica la heurística de Coloreado de Grafos (Welsh-Powell)
+     * Simula la asignación de recursos (colores) para evitar conflictos en las estaciones.
+     */
+    @GetMapping("/coloreado")
+    public ResponseEntity<Map<String, Object>> getColoreado() {
+        // El método en Service es 'analizarConflictos'
+        return ResponseEntity.ok(transporteService.analizarConflictos());
     }
 }
