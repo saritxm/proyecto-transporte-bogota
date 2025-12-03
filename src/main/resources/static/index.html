@@ -145,7 +145,7 @@
 
             // --- Variables Globales para el Mapa ---
             let map;
-            let pathLayer = null; // Para almacenar la polilínea de la ruta calculada
+            let pathLayers = []; // Almacenamos múltiples polilíneas (una por segmento)
 
             // --- Funciones de Mapa ---
 
@@ -169,20 +169,30 @@
              * @param {Array<Object>} estaciones Lista de objetos Estacion.
              */
             function drawStations(estaciones) {
+                // Limpiar marcadores anteriores
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker && !layer.isPermanent) {
+                        map.removeLayer(layer);
+                    }
+                });
+
                 estaciones.forEach(e => {
                     if (e.latitud && e.longitud) {
-                        const markerColor = e.id.startsWith('E') ? 'blue' : 'red'; // Simple diferenciación de color
+                        // Color de marcador diferente para estaciones Transmilenio (TM) y SITP
+                        const markerColor = e.id.startsWith('TM') ? 'blue' : 'red'; 
                         
                         // Icono Leaflet personalizado con color basado en la estación
                         const customIcon = L.divIcon({
-                            className: `marker-icon marker-color-${markerColor} bg-${markerColor}-600`,
+                            className: `marker-icon marker-color-${markerColor} text-${markerColor}-600`,
                             html: `<div class="w-3 h-3 rounded-full bg-current border-2 border-white shadow-md"></div>`,
                             iconSize: [12, 12],
                             iconAnchor: [6, 6] // Centrar el ícono
                         });
 
                         L.marker([e.latitud, e.longitud], {
-                            icon: customIcon
+                            icon: customIcon,
+                            // Marcar como no permanente para limpiar después
+                            isPermanent: false
                         })
                         .addTo(map)
                         .bindPopup(`<b>${e.nombre}</b> (${e.id})`);
@@ -191,30 +201,47 @@
             }
 
             /**
-             * Dibuja la polilínea de la ruta óptima calculada.
+             * Dibuja la polilínea de la ruta óptima calculada, segmentando entre cada estación.
              * @param {Array<Object>} camino Array de objetos Estacion que forman la ruta.
              */
             function drawPath(camino) {
-                // 1. Limpiar capa anterior si existe
-                if (pathLayer) {
-                    map.removeLayer(pathLayer);
-                }
+                // 1. Limpiar capas anteriores
+                pathLayers.forEach(layer => map.removeLayer(layer));
+                pathLayers = [];
 
                 if (!camino || camino.length < 2) return;
 
-                // 2. Extraer coordenadas en formato Leaflet [lat, lng]
-                const latlngs = camino.map(e => [e.latitud, e.longitud]);
-
-                // 3. Crear la polilínea
-                pathLayer = L.polyline(latlngs, {
+                const bounds = new L.LatLngBounds();
+                const pathOptions = {
                     color: 'darkgreen',
                     weight: 5,
                     opacity: 0.7,
                     dashArray: '10, 5'
-                }).addTo(map);
+                };
+                
+                // Iterar sobre pares de estaciones consecutivas
+                for (let i = 0; i < camino.length - 1; i++) {
+                    const currentStation = camino[i];
+                    const nextStation = camino[i + 1];
+
+                    // Extraer coordenadas del segmento
+                    const segmentLatlngs = [
+                        [currentStation.latitud, currentStation.longitud],
+                        [nextStation.latitud, nextStation.longitud]
+                    ];
+
+                    // 2. Crear la polilínea para el segmento y guardarla
+                    const segmentPath = L.polyline(segmentLatlngs, pathOptions).addTo(map);
+                    pathLayers.push(segmentPath);
+
+                    // 3. Extender los límites para centrar el mapa
+                    bounds.extend(segmentLatlngs);
+                }
 
                 // 4. Ajustar el mapa para que muestre toda la ruta
-                map.fitBounds(pathLayer.getBounds());
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
 
                 // Opcional: Marcar el origen y destino con íconos especiales (rojo y verde)
                 const start = camino[0];
@@ -228,13 +255,13 @@
                     iconAnchor: [8, 8]
                 });
                 
-                // Marcador de inicio (origen)
-                L.marker([start.latitud, start.longitud], { icon: createDotIcon('red') })
+                // Marcador de inicio (origen) - Marcador permanente
+                L.marker([start.latitud, start.longitud], { icon: createDotIcon('red'), isPermanent: true })
                     .addTo(map)
                     .bindPopup(`<b>Origen:</b> ${start.nombre}`).openPopup();
                 
-                // Marcador de fin (destino)
-                L.marker([end.latitud, end.longitud], { icon: createDotIcon('green') })
+                // Marcador de fin (destino) - Marcador permanente
+                L.marker([end.latitud, end.longitud], { icon: createDotIcon('green'), isPermanent: true })
                     .addTo(map)
                     .bindPopup(`<b>Destino:</b> ${end.nombre}`);
             }
@@ -391,7 +418,8 @@
                             </div>
                         `;
                         showMessage("Ruta no encontrada.", true);
-                        if (pathLayer) map.removeLayer(pathLayer); // Limpiar visualización anterior
+                        pathLayers.forEach(layer => map.removeLayer(layer)); // Limpiar visualización anterior
+                        pathLayers = [];
                     } else {
                         // Renderizar el resultado
                         resultDijkstra.innerHTML = `
