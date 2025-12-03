@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Optimización de Transporte - Bogotá</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluir Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         /* Estilos personalizados para el mapa */
         #map {
@@ -12,12 +14,6 @@
             width: 100%;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            background-color: #e5e7eb; /* Placeholder color */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #4b5563;
         }
         /* Estilo para los selectores mejorados */
         .select-custom {
@@ -85,11 +81,10 @@
         <!-- Columna de Mapa y Resultados (Derecha) -->
         <div class="lg:col-span-2 space-y-6">
 
-            <!-- Mapa del Sistema (Placeholder) -->
+            <!-- Mapa del Sistema -->
             <div class="h-96">
-                <div id="map">
-                    Visualización de la Red de Transporte y la Ruta Óptima Calculada
-                </div>
+                <!-- El ID 'map' es el que usa Leaflet para renderizar -->
+                <div id="map"></div>
             </div>
 
             <!-- 2. Reporte de Análisis de Optimización (Resultados Estáticos) -->
@@ -132,10 +127,13 @@
         </div>
     </div>
 
+    <!-- Incluir Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
     <!-- Script de Interacción -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const endpointBase = '/api/transporte'; 
+            const endpointBase = './api/transporte'; 
             const messageArea = document.getElementById('message-area');
             
             const selects = {
@@ -144,6 +142,103 @@
             };
             const btnCalcular = document.getElementById('btn-calcular-ruta');
             const resultDijkstra = document.getElementById('dijkstra-result');
+
+            // --- Variables Globales para el Mapa ---
+            let map;
+            let pathLayer = null; // Para almacenar la polilínea de la ruta calculada
+
+            // --- Funciones de Mapa ---
+
+            /**
+             * Inicializa el mapa de Leaflet centrado en Bogotá.
+             */
+            function initMap() {
+                // Coordenadas de Bogotá (ejemplo)
+                const BOGOTA_LAT = 4.6534;
+                const BOGOTA_LON = -74.0836;
+
+                map = L.map('map').setView([BOGOTA_LAT, BOGOTA_LON], 12);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+            }
+
+            /**
+             * Dibuja las estaciones como marcadores en el mapa.
+             * @param {Array<Object>} estaciones Lista de objetos Estacion.
+             */
+            function drawStations(estaciones) {
+                estaciones.forEach(e => {
+                    if (e.latitud && e.longitud) {
+                        const markerColor = e.id.startsWith('E') ? 'blue' : 'red'; // Simple diferenciación de color
+                        
+                        // Icono Leaflet personalizado con color basado en la estación
+                        const customIcon = L.divIcon({
+                            className: `marker-icon marker-color-${markerColor} bg-${markerColor}-600`,
+                            html: `<div class="w-3 h-3 rounded-full bg-current border-2 border-white shadow-md"></div>`,
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6] // Centrar el ícono
+                        });
+
+                        L.marker([e.latitud, e.longitud], {
+                            icon: customIcon
+                        })
+                        .addTo(map)
+                        .bindPopup(`<b>${e.nombre}</b> (${e.id})`);
+                    }
+                });
+            }
+
+            /**
+             * Dibuja la polilínea de la ruta óptima calculada.
+             * @param {Array<Object>} camino Array de objetos Estacion que forman la ruta.
+             */
+            function drawPath(camino) {
+                // 1. Limpiar capa anterior si existe
+                if (pathLayer) {
+                    map.removeLayer(pathLayer);
+                }
+
+                if (!camino || camino.length < 2) return;
+
+                // 2. Extraer coordenadas en formato Leaflet [lat, lng]
+                const latlngs = camino.map(e => [e.latitud, e.longitud]);
+
+                // 3. Crear la polilínea
+                pathLayer = L.polyline(latlngs, {
+                    color: 'darkgreen',
+                    weight: 5,
+                    opacity: 0.7,
+                    dashArray: '10, 5'
+                }).addTo(map);
+
+                // 4. Ajustar el mapa para que muestre toda la ruta
+                map.fitBounds(pathLayer.getBounds());
+
+                // Opcional: Marcar el origen y destino con íconos especiales (rojo y verde)
+                const start = camino[0];
+                const end = camino[camino.length - 1];
+
+                // Función para crear un icono de punto con color
+                const createDotIcon = (color) => L.divIcon({
+                    className: `dot-icon text-${color}-600`,
+                    html: `<div class="w-4 h-4 rounded-full bg-current border-4 border-white shadow-lg"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+                
+                // Marcador de inicio (origen)
+                L.marker([start.latitud, start.longitud], { icon: createDotIcon('red') })
+                    .addTo(map)
+                    .bindPopup(`<b>Origen:</b> ${start.nombre}`).openPopup();
+                
+                // Marcador de fin (destino)
+                L.marker([end.latitud, end.longitud], { icon: createDotIcon('green') })
+                    .addTo(map)
+                    .bindPopup(`<b>Destino:</b> ${end.nombre}`);
+            }
+
 
             // --- Funciones de Utilidad ---
             function showMessage(text, isError = false) {
@@ -196,6 +291,7 @@
                 Object.keys(statsMap).forEach(key => {
                     if (stats[key] !== undefined) {
                         const item = statsMap[key];
+                        // Formato similar al que viene del backend
                         const displayValue = (item.unit === 'K' && stats[key] > 1000) ? `${(stats[key] / 1000).toFixed(0)}K` : stats[key];
                         
                         const div = document.createElement('div');
@@ -211,7 +307,11 @@
 
             // --- Carga Inicial de Datos ---
             async function loadInitialData() {
+                // 1. Inicializar el mapa ANTES de cargar los datos
+                initMap();
+
                 try {
+                    // Se utilizan rutas relativas más robustas
                     const [estacionesResponse, statsResponse, analysisResponse] = await Promise.all([
                         fetch(`${endpointBase}/estaciones`),
                         fetch(`${endpointBase}/estadisticas`),
@@ -226,7 +326,7 @@
                     const stats = await statsResponse.json();
                     const analysis = await analysisResponse.json();
 
-                    // 1. Llenar Selectores
+                    // 2. Llenar Selectores
                     estaciones.forEach(e => {
                         const optionOrigen = new Option(`${e.nombre} (${e.id})`, e.id);
                         const optionDestino = new Option(`${e.nombre} (${e.id})`, e.id);
@@ -237,13 +337,16 @@
                     // Habilitar el botón después de cargar las estaciones
                     btnCalcular.disabled = false;
 
-                    // 2. Renderizar Estadísticas
+                    // 3. Renderizar Estadísticas
                     renderStats(stats);
 
-                    // 3. Renderizar Reporte de Análisis (ARM, Max Flow, Coloreado)
+                    // 4. Renderizar Reporte de Análisis (ARM, Max Flow, Coloreado)
                     renderAnalysisResults(analysis);
 
-                    showMessage("Datos del sistema cargados correctamente.");
+                    // 5. Dibujar las estaciones en el mapa
+                    drawStations(estaciones);
+                    
+                    showMessage("Datos del sistema y mapa cargados correctamente.");
                 } catch (error) {
                     console.error("Error cargando datos iniciales:", error);
                     showMessage(`Error al cargar datos del sistema. ${error.message}`, true);
@@ -279,25 +382,29 @@
 
                     const resultado = await response.json();
                     
-                    if (resultado.tiempoTotal === 1.7976931348623157e308 || resultado.tiempoTotal === -1 || resultado.camino.length === 0) {
-                        // El valor 1.79...e308 es Double.POSITIVE_INFINITY en Java
+                    // Condición para ruta no encontrada (Double.POSITIVE_INFINITY o camino vacío)
+                    if (resultado.tiempoTotal > 1e300 || resultado.tiempoTotal === -1 || resultado.camino.length < 2) {
                         resultDijkstra.innerHTML = `
                             <div class="space-y-2 p-3 bg-red-50 rounded-md border border-red-200">
                                 <p class="font-bold text-red-700">Ruta no Encontrada</p>
-                                <p class="text-sm text-gray-700">Las estaciones seleccionadas no están conectadas.</p>
+                                <p class="text-sm text-gray-700">Las estaciones seleccionadas no están conectadas o el servicio devolvió un error.</p>
                             </div>
                         `;
                         showMessage("Ruta no encontrada.", true);
+                        if (pathLayer) map.removeLayer(pathLayer); // Limpiar visualización anterior
                     } else {
                         // Renderizar el resultado
                         resultDijkstra.innerHTML = `
                             <div class="space-y-2 p-3 bg-green-50 rounded-md border border-green-200">
                                 <p class="font-bold text-green-700">Tiempo Total Estimado: <span class="text-2xl">${resultado.tiempoTotal.toFixed(2)} min</span></p>
-                                <p class="text-sm text-gray-700">Estaciones Visitadas: ${resultado.numeroEstaciones}</p>
+                                <p class="text-sm text-gray-700">Estaciones Visitadas: ${resultado.camino.length}</p>
                                 <p class="text-xs text-gray-500">Camino: ${resultado.camino.map(e => e.nombre).join(' → ')}</p>
                             </div>
                         `;
                         showMessage("Ruta óptima calculada con éxito.");
+                        
+                        // DIBUJAR LA RUTA EN EL MAPA
+                        drawPath(resultado.camino);
                     }
 
 

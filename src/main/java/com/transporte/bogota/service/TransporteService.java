@@ -63,6 +63,7 @@ public class TransporteService {
         
         // 1. Árbol de Recubrimiento Mínimo (ARM)
         try {
+            // Nota: Se usa el atributo tiempoViaje (double) de Ruta como el peso para el ARM
             List<GraphEdge> arm = MinimumSpanningTree.calcularARM(grafo);
             double costoTotalArm = arm.stream().mapToDouble(GraphEdge::getTiempo).sum();
             analysisResults.put("arm", List.of(
@@ -90,7 +91,6 @@ public class TransporteService {
 
         // 3. Flujo Máximo (Simulación general)
         // Usaremos dos estaciones de ejemplo para simular un análisis de congestión
-        // Nota: Asume que E001 y E002 son IDs válidos. Si no lo son, se debe ajustar la lógica.
         Estacion origenCongestion = sistema.getEstacion("E001"); 
         Estacion destinoCongestion = sistema.getEstacion("E002");
         
@@ -123,7 +123,6 @@ public class TransporteService {
     }
 
     private Graph construirGrafo() {
-        // ... (código para construirGrafo es el mismo)
         Graph g = new Graph();
 
         // Agregar todas las estaciones como nodos

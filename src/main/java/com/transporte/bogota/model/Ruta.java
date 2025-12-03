@@ -1,5 +1,8 @@
 package com.transporte.bogota.model;
 
+import java.util.List; // <<< ESTE IMPORT ES CRÍTICO (Error de List)
+import java.util.Map;  // <<< ESTE IMPORT ES CRÍTICO (Error de Map)
+
 /**
  * Representa una conexión directa entre dos estaciones.
  * Incluye tiempo de viaje, capacidad y distancia.
@@ -8,11 +11,13 @@ public class Ruta {
     private String id;
     private Estacion origen;
     private Estacion destino;
-    private int tiempoViaje;    // en minutos
-    private int capacidad;      // capacidad del vehículo/tramo (pasajeros por intervalo)
+    private int tiempoViaje;    // en minutos (Peso para Dijkstra)
+    private int capacidad;      // capacidad del vehículo/tramo (Capacidad para Max Flow)
     private double distanciaM;  // distancia en metros
-    private List<Map<String, Double>> polyline;
+    private List<Map<String, Double>> polyline; // Coordenadas para dibujar la ruta en el mapa
+
     public Ruta() {
+        // Constructor vacío para frameworks de serialización
     }
 
     public Ruta(String id, Estacion origen, Estacion destino, int tiempoViaje, int capacidad, double distanciaM) {
@@ -41,6 +46,9 @@ public class Ruta {
 
     public double getDistanciaM() { return distanciaM; }
     public void setDistanciaM(double distanciaM) { this.distanciaM = distanciaM; }
+
+    public List<Map<String, Double>> getPolyline() { return polyline; }
+    public void setPolyline(List<Map<String, Double>> polyline) { this.polyline = polyline; }
 
     @Override
     public String toString() {
