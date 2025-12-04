@@ -1,5 +1,5 @@
 // Configuración de la API
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'http://localhost:8080/api/transporte';
 
 // Inicializar mapa centrado en Bogotá
 const map = L.map('map').setView([4.6533, -74.0836], 12);
@@ -262,7 +262,7 @@ async function calcularRuta() {
     btn.textContent = 'Calculando...';
 
     try {
-        const response = await fetch(`${API_URL}/ruta-optima?origen=${origenId}&destino=${destinoId}`);
+        const response = await fetch(`${API_URL}/ruta-optima?origenId=${origenId}&destinoId=${destinoId}`);
         const resultado = await response.json();
         
         let resultadoHTML = `
@@ -307,7 +307,7 @@ async function calcularFlujoMaximo() {
     btn.textContent = 'Analizando...';
 
     try {
-        const response = await fetch(`${API_URL}/flujo-maximo?origen=${origenId}&destino=${destinoId}`);
+        const response = await fetch(`${API_URL}/flujo-maximo?origenId=${origenId}&destinoId=${destinoId}`);
         const resultado = await response.json();
         
         const color = resultado.flujoMaximo > 5000 ? '#2196F3' : '#F44336';

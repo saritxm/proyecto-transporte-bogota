@@ -206,6 +206,10 @@ public class TransporteService {
         return sistema.getEstacion(id);
     }
 
+    public Estacion getEstacionPorId(String id) {
+        return sistema.getEstacion(id);
+    }
+
     /**
      * Obtiene estadísticas generales del sistema
      */
