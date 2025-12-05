@@ -1,11 +1,13 @@
 package com.transporte.bogota.model;
 
 import java.util.*;
+import org.springframework.stereotype.Component;
 
 /**
  * SistemaTransporte: almacena estaciones, rutas y líneas.
  * Gestor central del sistema de transporte público.
  */
+@Component
 public class SistemaTransporte {
 
     private final Map<String, Estacion> estacionesById = new HashMap<>();

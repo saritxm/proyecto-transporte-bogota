@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Búsqueda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
+        <h1 class="text-2xl font-bold mb-4">Test de Búsqueda de Estaciones</h1>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Buscar estación:</label>
+                <div class="flex gap-2">
+                    <input id="search-input" type="text" placeholder="Escribe y presiona Enter..."
+                           class="flex-1 p-2 border rounded">
+                    <button id="search-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        🔍 Buscar
+                    </button>
+                </div>
+            </div>
+
+            <div id="results" class="mt-4 p-4 bg-gray-50 rounded min-h-[100px]">
+                <p class="text-gray-500">Los resultados aparecerán aquí...</p>
+            </div>
+
+            <div id="console-log" class="mt-4 p-4 bg-black text-green-400 rounded font-mono text-xs max-h-96 overflow-y-auto">
+                <div class="font-bold mb-2">Console Log:</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api/transporte';
+        const consoleLog = document.getElementById('console-log');
+
+        function log(message, data = null) {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${time}] ${message}`;
+            if (data) {
+                logEntry.textContent += ' ' + JSON.stringify(data);
+            }
+            consoleLog.appendChild(logEntry);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+            console.log(message, data);
+        }
+
+        async function buscar() {
+            const query = document.getElementById('search-input').value.trim();
+            const resultsDiv = document.getElementById('results');
+
+            log('🔍 Iniciando búsqueda', { query });
+
+            if (!query) {
+                resultsDiv.innerHTML = '<p class="text-red-500">Por favor escribe algo para buscar</p>';
+                return;
+            }
+
+            try {
+                const url = `${API_URL}/estaciones/buscar?q=${encodeURIComponent(query)}&limit=10`;
+                log('📡 Haciendo fetch a:', { url });
+
+                const response = await fetch(url);
+                log('📊 Response recibida', { status: response.status, ok: response.ok });
+
+                const data = await response.json();
+                log('📦 Datos recibidos', { count: data.length });
+
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<p class="text-yellow-600">No se encontraron resultados</p>';
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="font-bold mb-2">Encontradas ${data.length} estaciones:</div>
+                        ${data.map(e => `
+                            <div class="p-2 mb-2 bg-white border rounded">
+                                <div class="font-medium">${e.nombre}</div>
+                                <div class="text-xs text-gray-600">${e.tipo.toUpperCase()} - ${e.id}</div>
+                                <div class="text-xs text-gray-500">Lat: ${e.latitud}, Lng: ${e.longitud}</div>
+                            </div>
+                        `).join('')}
+                    `;
+                }
+            } catch (error) {
+                log('❌ Error:', { error: error.message });
+                resultsDiv.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('search-btn').addEventListener('click', () => {
+            log('🖱️  Click en botón');
+            buscar();
+        });
+
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                log('⏎ Enter presionado');
+                buscar();
+            }
+        });
+
+        log('✅ Página de test cargada');
+    </script>
+</body>
+</html>

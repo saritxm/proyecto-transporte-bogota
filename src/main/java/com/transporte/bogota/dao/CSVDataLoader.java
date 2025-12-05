@@ -9,6 +9,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.FileReader;
@@ -26,17 +27,15 @@ public class CSVDataLoader {
     private static final Logger logger = LoggerFactory.getLogger(CSVDataLoader.class);
 
     private final String dataPath;
+    private final SistemaTransporte sistema;
 
-    public CSVDataLoader() {
+    @Autowired
+    public CSVDataLoader(SistemaTransporte sistema) {
         this.dataPath = "data";
+        this.sistema = sistema;
     }
 
-    public CSVDataLoader(String dataPath) {
-        this.dataPath = dataPath;
-    }
-
-    public SistemaTransporte cargarDatos() throws IOException {
-        SistemaTransporte sistema = new SistemaTransporte();
+    public void cargarDatos() throws IOException {
         logger.info("Iniciando carga de datos desde: {}", dataPath);
 
         cargarEstaciones(sistema);
@@ -47,12 +46,10 @@ public class CSVDataLoader {
             sistema.getAllEstaciones().size(),
             sistema.getAllRutas().size(),
             sistema.getAllLineas().size());
-
-        return sistema;
     }
 
     private void cargarEstaciones(SistemaTransporte sistema) throws IOException {
-        String archivo = dataPath + "/estaciones.csv";
+        String archivo = dataPath + "/estaciones_completo.csv.backup";
         logger.info("Cargando estaciones desde: {}", archivo);
 
         try (Reader reader = new FileReader(archivo);
@@ -78,7 +75,7 @@ public class CSVDataLoader {
     }
 
     private void cargarRutas(SistemaTransporte sistema) throws IOException {
-        String archivo = dataPath + "/rutas.csv";
+        String archivo = dataPath + "/rutas_generadas.csv";
         logger.info("Cargando rutas desde: {}", archivo);
 
         try (Reader reader = new FileReader(archivo);

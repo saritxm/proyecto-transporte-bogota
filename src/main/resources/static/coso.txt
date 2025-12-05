@@ -1,0 +1,531 @@
+<!-- Script de Interacción -->
+    <script>
+        /* COMENTADO TEMPORALMENTE - Usar app.js en su lugar
+        document.addEventListener('DOMContentLoaded', () => {
+            const endpointBase = './api/transporte'; 
+            const messageArea = document.getElementById('message-area');
+            
+            const selects = {
+                origen: document.getElementById('select-origen'),
+                destino: document.getElementById('select-destino')
+            };
+            const btnCalcular = document.getElementById('btn-calcular-ruta');
+            const btnCongestion = document.getElementById('btn-analizar-congestion');
+            const resultCongestion = document.getElementById('congestion-result');
+            const resultDijkstra = document.getElementById('dijkstra-result');
+
+            // --- Variables Globales para el Mapa ---
+            let map;
+            let pathLayers = []; // Almacenamos múltiples polilíneas (una por segmento)
+
+            // --- Funciones de Mapa ---
+
+            /**
+             * Inicializa el mapa de Leaflet centrado en Bogotá.
+             */
+            function initMap() {
+                // Coordenadas de Bogotá (ejemplo)
+                const BOGOTA_LAT = 4.6534;
+                const BOGOTA_LON = -74.0836;
+
+                map = L.map('map').setView([BOGOTA_LAT, BOGOTA_LON], 12);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+            }
+
+            /**
+             * Dibuja las estaciones como marcadores en el mapa.
+             * @param {Array<Object>} estaciones Lista de objetos Estacion.
+             */
+            function drawStations(estaciones) {
+                // Limpiar marcadores anteriores
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker && !layer.isPermanent) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                estaciones.forEach(e => {
+                    if (e.latitud && e.longitud) {
+                        // Color de marcador diferente para estaciones Transmilenio (TM) y SITP
+                        const markerColor = e.id.startsWith('TM') ? 'blue' : 'red'; 
+                        
+                        // Icono Leaflet personalizado con color basado en la estación
+                        const customIcon = L.divIcon({
+                            className: `marker-icon marker-color-${markerColor} text-${markerColor}-600`,
+                            html: `<div class="w-3 h-3 rounded-full bg-current border-2 border-white shadow-md"></div>`,
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6] // Centrar el ícono
+                        });
+
+                        L.marker([e.latitud, e.longitud], {
+                            icon: customIcon,
+                            // Marcar como no permanente para limpiar después
+                            isPermanent: false
+                        })
+                        .addTo(map)
+                        .bindPopup(`<b>${e.nombre}</b> (${e.id})`);
+                    }
+                });
+            }
+
+            /**
+             * Dibuja la polilínea de la ruta óptima calculada usando enrutamiento GPS realista.
+             * Usa OSRM (Open Source Routing Machine) para obtener rutas que sigan las calles reales.
+             * @param {Array<Object>} camino Array de objetos Estacion que forman la ruta.
+             */
+            async function drawPath(camino) {
+                // 1. Limpiar capas anteriores
+                pathLayers.forEach(layer => map.removeLayer(layer));
+                pathLayers = [];
+
+                if (!camino || camino.length < 2) return;
+
+                const bounds = new L.LatLngBounds();
+                const pathOptions = {
+                    color: '#2563EB', // Azul más realista tipo GPS
+                    weight: 6,
+                    opacity: 0.8,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                };
+
+                // Iterar sobre pares de estaciones consecutivas
+                for (let i = 0; i < camino.length - 1; i++) {
+                    const currentStation = camino[i];
+                    const nextStation = camino[i + 1];
+
+                    try {
+                        // Llamar a OSRM para obtener la ruta real por calles
+                        const coords = `${currentStation.longitud},${currentStation.latitud};${nextStation.longitud},${nextStation.latitud}`;
+                        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+
+                        const response = await fetch(osrmUrl);
+                        const data = await response.json();
+
+                        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                            // Extraer las coordenadas de la ruta GPS
+                            const routeCoordinates = data.routes[0].geometry.coordinates;
+
+                            // Convertir de [lon, lat] a [lat, lon] para Leaflet
+                            const leafletCoords = routeCoordinates.map(coord => [coord[1], coord[0]]);
+
+                            // Crear la polilínea GPS
+                            const segmentPath = L.polyline(leafletCoords, pathOptions).addTo(map);
+                            pathLayers.push(segmentPath);
+
+                            // Extender los límites
+                            leafletCoords.forEach(coord => bounds.extend(coord));
+                        } else {
+                            // Fallback: línea recta si OSRM falla
+                            const segmentLatlngs = [
+                                [currentStation.latitud, currentStation.longitud],
+                                [nextStation.latitud, nextStation.longitud]
+                            ];
+                            const segmentPath = L.polyline(segmentLatlngs, {
+                                ...pathOptions,
+                                dashArray: '10, 5', // Línea punteada para indicar que es fallback
+                                color: '#EF4444' // Rojo para indicar que no es ruta GPS
+                            }).addTo(map);
+                            pathLayers.push(segmentPath);
+                            bounds.extend(segmentLatlngs);
+                        }
+                    } catch (error) {
+                        console.warn(`Error obteniendo ruta GPS entre ${currentStation.nombre} y ${nextStation.nombre}:`, error);
+
+                        // Fallback: línea recta
+                        const segmentLatlngs = [
+                            [currentStation.latitud, currentStation.longitud],
+                            [nextStation.latitud, nextStation.longitud]
+                        ];
+                        const segmentPath = L.polyline(segmentLatlngs, {
+                            ...pathOptions,
+                            dashArray: '10, 5',
+                            color: '#EF4444'
+                        }).addTo(map);
+                        pathLayers.push(segmentPath);
+                        bounds.extend(segmentLatlngs);
+                    }
+                }
+
+                // 4. Ajustar el mapa para que muestre toda la ruta
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+
+                // Marcar el origen y destino con íconos especiales
+                const start = camino[0];
+                const end = camino[camino.length - 1];
+
+                // Función para crear un icono de punto con color
+                const createDotIcon = (color) => L.divIcon({
+                    className: `dot-icon text-${color}-600`,
+                    html: `<div class="w-4 h-4 rounded-full bg-current border-4 border-white shadow-lg"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+
+                // Marcador de inicio (origen) - Marcador permanente
+                L.marker([start.latitud, start.longitud], { icon: createDotIcon('red'), isPermanent: true })
+                    .addTo(map)
+                    .bindPopup(`<b>Origen:</b> ${start.nombre}`).openPopup();
+
+                // Marcador de fin (destino) - Marcador permanente
+                L.marker([end.latitud, end.longitud], { icon: createDotIcon('green'), isPermanent: true })
+                    .addTo(map)
+                    .bindPopup(`<b>Destino:</b> ${end.nombre}`);
+
+                // Marcar las estaciones intermedias
+                for (let i = 1; i < camino.length - 1; i++) {
+                    const station = camino[i];
+                    const intermediateIcon = L.divIcon({
+                        className: 'intermediate-station',
+                        html: `<div class="w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow-md"></div>`,
+                        iconSize: [12, 12],
+                        iconAnchor: [6, 6]
+                    });
+
+                    L.marker([station.latitud, station.longitud], {
+                        icon: intermediateIcon,
+                        isPermanent: true
+                    })
+                    .addTo(map)
+                    .bindPopup(`<b>${i}. ${station.nombre}</b>`);
+                }
+            }
+
+
+            // --- Funciones de Utilidad ---
+            function showMessage(text, isError = false) {
+                messageArea.textContent = text;
+                messageArea.className = isError 
+                    ? 'text-center p-3 text-sm rounded-md bg-red-100 text-red-700 transition-opacity duration-300'
+                    : 'text-center p-3 text-sm rounded-md bg-green-100 text-green-700 transition-opacity duration-300';
+                messageArea.classList.remove('hidden');
+                setTimeout(() => {
+                    messageArea.classList.add('hidden');
+                }, 5000);
+            }
+
+            function renderAnalysisResults(results) {
+                const renderList = (id, data) => {
+                    const ul = document.querySelector(`#${id} ul`);
+                    ul.innerHTML = '';
+                    if (data && Array.isArray(data)) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            if (item.key === 'error') {
+                                li.className = 'text-red-500 font-bold';
+                                li.textContent = `[ERROR] ${item.value}`;
+                            } else {
+                                li.textContent = `${item.key.charAt(0).toUpperCase() + item.key.slice(1)}: ${item.value}`;
+                            }
+                            ul.appendChild(li);
+                        });
+                    } else {
+                        ul.innerHTML = '<li>No hay resultados de análisis disponibles.</li>';
+                    }
+                };
+
+                renderList('coloring-result', results.coloring);
+                renderList('maxflow-result', results.maxFlow);
+                renderList('arm-result', results.arm);
+            }
+            
+            function renderStats(stats) {
+                const grid = document.getElementById('stats-grid');
+                grid.innerHTML = '';
+                
+                const statsMap = {
+                    totalEstaciones: { label: 'Estaciones', unit: '' },
+                    totalRutas: { label: 'Rutas', unit: '' },
+                    totalLineas: { label: 'Líneas', unit: '' },
+                    capacidadTotal: { label: 'Capacidad Total', unit: 'K' }
+                };
+
+                Object.keys(statsMap).forEach(key => {
+                    if (stats[key] !== undefined) {
+                        const item = statsMap[key];
+                        // Formato similar al que viene del backend
+                        const displayValue = (item.unit === 'K' && stats[key] > 1000) ? `${(stats[key] / 1000).toFixed(0)}K` : stats[key];
+                        
+                        const div = document.createElement('div');
+                        div.className = 'bg-indigo-50 p-4 rounded-xl text-center shadow-sm';
+                        div.innerHTML = `
+                            <p class="text-2xl font-bold text-indigo-700">${displayValue}</p>
+                            <p class="text-xs text-gray-500 uppercase">${item.label}</p>
+                        `;
+                        grid.appendChild(div);
+                    }
+                });
+            }
+
+            // --- Carga Inicial de Datos ---
+            async function loadInitialData() {
+                // 1. Inicializar el mapa ANTES de cargar los datos
+                initMap();
+
+                try {
+                    // Se utilizan rutas relativas más robustas
+                    const [estacionesResponse, statsResponse, analysisResponse] = await Promise.all([
+                        fetch(`${endpointBase}/estaciones`),
+                        fetch(`${endpointBase}/estadisticas`),
+                        fetch(`${endpointBase}/analysis`)
+                    ]);
+
+                    if (!estacionesResponse.ok || !statsResponse.ok || !analysisResponse.ok) {
+                        throw new Error("Una de las respuestas del servidor no fue OK.");
+                    }
+
+                    const estaciones = await estacionesResponse.json();
+                    const stats = await statsResponse.json();
+                    const analysis = await analysisResponse.json();
+
+                    // 2. Llenar Selectores
+                    estaciones.forEach(e => {
+                        const optionOrigen = new Option(`${e.nombre} (${e.id})`, e.id);
+                        const optionDestino = new Option(`${e.nombre} (${e.id})`, e.id);
+                        selects.origen.add(optionOrigen);
+                        selects.destino.add(optionDestino);
+                    });
+                    
+                    // Habilitar los botones después de cargar las estaciones
+                    btnCalcular.disabled = false;
+                    btnCongestion.disabled = false;
+
+                    // 3. Renderizar Estadísticas
+                    renderStats(stats);
+
+                    // 4. Renderizar Reporte de Análisis (ARM, Max Flow, Coloreado)
+                    renderAnalysisResults(analysis);
+
+                    // 5. Dibujar las estaciones en el mapa
+                    drawStations(estaciones);
+                    
+                    showMessage("Datos del sistema y mapa cargados correctamente.");
+                } catch (error) {
+                    console.error("Error cargando datos iniciales:", error);
+                    showMessage(`Error al cargar datos del sistema. ${error.message}`, true);
+                }
+            }
+
+            // --- Manejador de Cálculo de Ruta (Dijkstra) ---
+            btnCalcular.addEventListener('click', async () => {
+                const origenId = selects.origen.value;
+                const destinoId = selects.destino.value;
+                
+                if (!origenId || !destinoId) {
+                    showMessage("Por favor, selecciona estación de origen y destino.", true);
+                    return;
+                }
+                
+                if (origenId === destinoId) {
+                    showMessage("Origen y destino deben ser diferentes.", true);
+                    return;
+                }
+
+                btnCalcular.disabled = true;
+                btnCalcular.textContent = 'Calculando...';
+                resultDijkstra.innerHTML = 'Buscando la ruta óptima...';
+
+                try {
+                    const response = await fetch(`${endpointBase}/ruta-optima?origenId=${origenId}&destinoId=${destinoId}`);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                         throw new Error(`Error en el servicio: ${response.status} - ${errorText.substring(0, 150)}...`);
+                    }
+
+                    const resultado = await response.json();
+                    
+                    // Condición para ruta no encontrada (Double.POSITIVE_INFINITY o camino vacío)
+                    if (resultado.tiempoTotal > 1e300 || resultado.tiempoTotal === -1 || resultado.camino.length < 2) {
+                        resultDijkstra.innerHTML = `
+                            <div class="space-y-2 p-3 bg-red-50 rounded-md border border-red-200">
+                                <p class="font-bold text-red-700">Ruta no Encontrada</p>
+                                <p class="text-sm text-gray-700">Las estaciones seleccionadas no están conectadas o el servicio devolvió un error.</p>
+                            </div>
+                        `;
+                        showMessage("Ruta no encontrada.", true);
+                        pathLayers.forEach(layer => map.removeLayer(layer)); // Limpiar visualización anterior
+                        pathLayers = [];
+                    } else {
+                        // Renderizar el resultado
+                        resultDijkstra.innerHTML = `
+                            <div class="space-y-2 p-3 bg-green-50 rounded-md border border-green-200">
+                                <p class="font-bold text-green-700">Tiempo Total Estimado: <span class="text-2xl">${resultado.tiempoTotal.toFixed(2)} min</span></p>
+                                <p class="text-sm text-gray-700">Estaciones Visitadas: ${resultado.camino.length}</p>
+                                <p class="text-xs text-gray-500">Camino: ${resultado.camino.map(e => e.nombre).join(' → ')}</p>
+                            </div>
+                        `;
+                        showMessage("Ruta óptima calculada con éxito.");
+
+                        // DIBUJAR LA RUTA EN EL MAPA (ahora es asíncrono)
+                        await drawPath(resultado.camino);
+                    }
+
+
+                } catch (error) {
+                    console.error("Error al calcular la ruta:", error);
+                    resultDijkstra.innerHTML = `
+                        <p class="text-red-600 font-medium">Error al calcular la ruta:</p>
+                        <p class="text-xs text-red-500">${error.message || "Asegúrate de que las estaciones estén conectadas y de que Dijkstra esté funcionando."}</p>
+                    `;
+                    showMessage("Error al calcular la ruta. Revisa la consola para detalles.", true);
+                } finally {
+                    btnCalcular.disabled = false;
+                    btnCalcular.textContent = 'Calcular Ruta Más Corta';
+                }
+            });
+
+            // --- Manejador de Análisis de Congestión ---
+            btnCongestion.addEventListener('click', async () => {
+                const origenId = selects.origen.value;
+                const destinoId = selects.destino.value;
+
+                if (!origenId || !destinoId) {
+                    showMessage("Por favor, selecciona estación de origen y destino.", true);
+                    return;
+                }
+
+                if (origenId === destinoId) {
+                    showMessage("Origen y destino deben ser diferentes.", true);
+                    return;
+                }
+
+                btnCongestion.disabled = true;
+                btnCongestion.textContent = 'Analizando...';
+                resultCongestion.innerHTML = 'Analizando congestión en hora pico...';
+
+                try {
+                    const response = await fetch(`${endpointBase}/analisis-congestion?origenId=${origenId}&destinoId=${destinoId}`);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Error en el servicio: ${response.status} - ${errorText}`);
+                    }
+
+                    const analisis = await response.json();
+
+                    // Mostrar resultados
+                    const nivel = analisis.nivelCongestion;
+                    resultCongestion.innerHTML = `
+                        <div class="space-y-3 p-4 bg-white rounded-lg border shadow-sm">
+                            <h4 class="font-bold text-lg flex items-center gap-2">
+                                <span style="color: ${nivel.color}">●</span>
+                                Análisis de Congestión - ${nivel.nivel}
+                            </h4>
+
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div class="p-2 bg-green-50 rounded border border-green-200">
+                                    <p class="text-xs text-gray-600">Flujo Normal</p>
+                                    <p class="text-lg font-bold text-green-700">${analisis.flujoNormal.toLocaleString()} pax/h</p>
+                                </div>
+                                <div class="p-2 bg-orange-50 rounded border border-orange-200">
+                                    <p class="text-xs text-gray-600">Flujo Hora Pico</p>
+                                    <p class="text-lg font-bold text-orange-700">${analisis.flujoHoraPico.toLocaleString()} pax/h</p>
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded" style="background-color: ${nivel.color}20; border: 1px solid ${nivel.color}">
+                                <p class="text-sm font-semibold" style="color: ${nivel.color}">
+                                    Reducción: ${analisis.porcentajeReduccion}%
+                                </p>
+                            </div>
+
+                            ${analisis.cuellosBotella.length > 0 ? `
+                                <div class="mt-3">
+                                    <h5 class="font-semibold text-red-700 mb-2">🔴 Cuellos de Botella:</h5>
+                                    ${analisis.cuellosBotella.map((cuello, i) => `
+                                        <div class="p-2 bg-red-50 rounded border border-red-200 mb-2 text-xs">
+                                            <p class="font-medium">${i + 1}. ${cuello.origen.nombre} → ${cuello.destino.nombre}</p>
+                                            <p class="text-gray-600">
+                                                Uso: ${cuello.porcentajeUso}%
+                                                (${cuello.flujoActual}/${cuello.capacidadTotal} pax)
+                                            </p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+
+                            <div class="mt-3 border-t pt-3">
+                                <h5 class="font-semibold text-gray-700 mb-2">💡 Recomendaciones:</h5>
+                                <ul class="text-xs space-y-1">
+                                    ${analisis.recomendaciones.map(rec => `
+                                        <li class="text-gray-700">${rec}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                    // Dibujar cuellos de botella en el mapa
+                    if (analisis.cuellosBotella.length > 0) {
+                        dibujarCuellosBotella(analisis.cuellosBotella);
+                    }
+
+                    showMessage("Análisis de congestión completado.");
+                } catch (error) {
+                    console.error("Error al analizar congestión:", error);
+                    resultCongestion.innerHTML = `
+                        <p class="text-red-600 font-medium">Error al analizar congestión:</p>
+                        <p class="text-xs text-red-500">${error.message}</p>
+                    `;
+                    showMessage("Error al analizar congestión. Revisa la consola.", true);
+                } finally {
+                    btnCongestion.disabled = false;
+                    btnCongestion.textContent = '🚦 Analizar Congestión (Hora Pico)';
+                }
+            });
+
+            /**
+             * Dibuja los cuellos de botella en el mapa con líneas rojas gruesas.
+             */
+            function dibujarCuellosBotella(cuellos) {
+                // Limpiar capas anteriores
+                pathLayers.forEach(layer => map.removeLayer(layer));
+                pathLayers = [];
+
+                const bounds = new L.LatLngBounds();
+
+                cuellos.forEach((cuello, index) => {
+                    const coords = [
+                        [cuello.latitudOrigen, cuello.longitudOrigen],
+                        [cuello.latitudDestino, cuello.longitudDestino]
+                    ];
+
+                    // Color basado en porcentaje de uso
+                    const color = cuello.porcentajeUso > 85 ? '#991B1B' : // Rojo oscuro
+                                  cuello.porcentajeUso > 75 ? '#DC2626' : // Rojo
+                                  '#F59E0B'; // Amarillo
+
+                    const cuelloLine = L.polyline(coords, {
+                        color: color,
+                        weight: 8,
+                        opacity: 0.7,
+                        dashArray: '5, 10'
+                    }).addTo(map);
+
+                    cuelloLine.bindPopup(`
+                        <b>🚨 Cuello de Botella #${index + 1}</b><br>
+                        <b>${cuello.origen.nombre}</b> → <b>${cuello.destino.nombre}</b><br>
+                        Uso: ${cuello.porcentajeUso}%<br>
+                        Capacidad: ${cuello.flujoActual}/${cuello.capacidadTotal} pax
+                    `);
+
+                    pathLayers.push(cuelloLine);
+                    bounds.extend(coords);
+                });
+
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+
+            // Iniciar la carga de datos
+            loadInitialData();
+        });
+        FIN DEL COMENTARIO - Usar app.js en su lugar */
+    </script>

@@ -32,13 +32,18 @@ public class TransporteService {
 
     private final CSVDataLoader dataLoader;
     private final EstacionIndexService indexService;
-    private SistemaTransporte sistema;
-    private Graph grafo;
+    private final RutaIndexService rutaIndexService;
+    private final SistemaTransporte sistema;
+    private LazyGraphService lazyGraphService;
+    private Graph grafoCompleto; // Solo para análisis globales
     private Map<String, Object> analysisResults; // Campo para almacenar resultados de análisis
 
-    public TransporteService(CSVDataLoader dataLoader, EstacionIndexService indexService) {
+    public TransporteService(CSVDataLoader dataLoader, EstacionIndexService indexService,
+                            RutaIndexService rutaIndexService, SistemaTransporte sistema) {
         this.dataLoader = dataLoader;
         this.indexService = indexService;
+        this.rutaIndexService = rutaIndexService;
+        this.sistema = sistema;
         this.analysisResults = new HashMap<>();
     }
 
@@ -46,10 +51,20 @@ public class TransporteService {
     public void init() {
         try {
             logger.info("Inicializando servicio de transporte...");
-            this.sistema = dataLoader.cargarDatos();
-            this.grafo = construirGrafo();
-            calcularResultadosDeAnalisis(); // Calcular análisis al inicio
-            logger.info("Servicio inicializado correctamente");
+            dataLoader.cargarDatos();
+
+            // Crear LazyGraphService después de cargar el sistema
+            this.lazyGraphService = new LazyGraphService(sistema, rutaIndexService);
+
+            // CAMBIO: Ya NO construimos el grafo completo al inicio
+            // Solo lo construimos cuando se necesite para análisis globales
+            logger.info("Sistema inicializado - Estaciones: {}", sistema.getAllEstaciones().size());
+            logger.info("Grafo lazy activado - Se construirá bajo demanda");
+
+            // Calcular análisis solo si se necesita el grafo completo
+            // calcularResultadosDeAnalisis(); // Comentado por ahora
+
+            logger.info("Servicio inicializado correctamente (modo lazy)");
         } catch (IOException e) {
             logger.error("Error al cargar datos del sistema", e);
             throw new RuntimeException("Error al inicializar sistema de transporte", e);
@@ -59,14 +74,21 @@ public class TransporteService {
     /**
      * Calcula y almacena los resultados de los algoritmos de ARM, Max Flow y Coloreado
      * para ser usados como reporte de análisis.
+     * NOTA: Este método construye el grafo completo, lo cual es costoso.
      */
     private void calcularResultadosDeAnalisis() {
         logger.info("Calculando resultados de análisis (ARM, MaxFlow, GraphColoring)...");
-        
+        logger.warn("Construyendo grafo completo para análisis globales...");
+
+        // Construir grafo completo solo para análisis
+        if (grafoCompleto == null) {
+            grafoCompleto = lazyGraphService.construirGrafoCompleto();
+        }
+
         // 1. Árbol de Recubrimiento Mínimo (ARM)
         try {
             // Nota: Se usa el atributo tiempoViaje (double) de Ruta como el peso para el ARM
-            List<GraphEdge> arm = MinimumSpanningTree.calcularARM(grafo);
+            List<GraphEdge> arm = MinimumSpanningTree.calcularARM(grafoCompleto);
             double costoTotalArm = arm.stream().mapToDouble(GraphEdge::getTiempo).sum();
             analysisResults.put("arm", List.of(
                 Map.of("key", "conexiones", "value", arm.size()),
@@ -80,7 +102,7 @@ public class TransporteService {
 
         // 2. Coloreado de Grafos
         try {
-            Map<Estacion, Integer> colores = GraphColoring.colorearGrafo(grafo);
+            Map<Estacion, Integer> colores = GraphColoring.colorearGrafo(grafoCompleto);
             int coloresUsados = (int) colores.values().stream().distinct().count();
             analysisResults.put("coloring", List.of(
                 Map.of("key", "recursosMinimos", "value", coloresUsados),
@@ -107,7 +129,7 @@ public class TransporteService {
         
         if (origenCongestion != null && destinoCongestion != null && !origenCongestion.equals(destinoCongestion)) {
             try {
-                int flujoMaximo = MaxFlow.calcularFlujoMaximo(grafo, origenCongestion, destinoCongestion);
+                int flujoMaximo = MaxFlow.calcularFlujoMaximo(grafoCompleto, origenCongestion, destinoCongestion);
                 analysisResults.put("maxFlow", List.of(
                     Map.of("key", "flujoMaximo", "value", flujoMaximo),
                     Map.of("key", "rutaAnalizada", "value", origenCongestion.getNombre() + " a " + destinoCongestion.getNombre()),
@@ -124,27 +146,8 @@ public class TransporteService {
         logger.info("Resultados de análisis calculados y almacenados.");
     }
 
-    private Graph construirGrafo() {
-        Graph g = new Graph();
-
-        // Agregar todas las estaciones como nodos
-        for (Estacion e : sistema.getAllEstaciones()) {
-            g.addNodo(e);
-        }
-
-        // Agregar todas las rutas como aristas
-        for (Ruta r : sistema.getAllRutas()) {
-            // Se asume que getTiempoViaje() es el peso (Dijkstra)
-            // y getCapacidad() es la capacidad (Max Flow)
-            g.addArista(r.getOrigen(), r.getDestino(), r.getTiempoViaje(), r.getCapacidad());
-        }
-
-        logger.info("Grafo construido - Nodos: {}, Aristas: {}",
-                g.getNodos().size(),
-                g.getNodos().stream().mapToInt(n -> g.getVecinos(n).size()).sum());
-
-        return g;
-    }
+    // NOTA: construirGrafo() ya no se usa.
+    // Ahora usamos LazyGraphService para construir grafos bajo demanda.
 
     // =========================================================================
     // 1. ALGORITMO: DIJKSTRA (Ruta Óptima) - Única función interactiva de cálculo
@@ -152,6 +155,7 @@ public class TransporteService {
 
     /**
      * Calcula la ruta más corta (tiempo mínimo) entre dos estaciones usando Dijkstra.
+     * Usa lazy loading: construye un grafo solo con rutas relevantes.
      */
     public Map<String, Object> calcularRutaOptima(String origenId, String destinoId) {
         Estacion origen = sistema.getEstacion(origenId);
@@ -161,8 +165,12 @@ public class TransporteService {
             throw new IllegalArgumentException("Estación no encontrada");
         }
 
-        // Llamada al algoritmo Dijkstra
-        Dijkstra.ResultadoDijkstra resultado = Dijkstra.calcularCaminoMinimo(grafo, origen, destino);
+        // Construir grafo lazy solo con rutas relevantes
+        logger.info("Calculando ruta óptima: {} -> {}", origen.getNombre(), destino.getNombre());
+        Graph grafoLazy = lazyGraphService.construirGrafoLazy(origen, destino);
+
+        // Llamada al algoritmo Dijkstra con el grafo lazy
+        Dijkstra.ResultadoDijkstra resultado = Dijkstra.calcularCaminoMinimo(grafoLazy, origen, destino);
 
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("origen", crearEstacionDTO(origen));
@@ -342,8 +350,12 @@ public class TransporteService {
         return dto;
     }
 
-    public Graph getGrafo() {
-        return grafo;
+    public Graph getGrafoCompleto() {
+        // Construir grafo completo bajo demanda si no existe
+        if (grafoCompleto == null) {
+            grafoCompleto = lazyGraphService.construirGrafoCompleto();
+        }
+        return grafoCompleto;
     }
 
     public SistemaTransporte getSistema() {

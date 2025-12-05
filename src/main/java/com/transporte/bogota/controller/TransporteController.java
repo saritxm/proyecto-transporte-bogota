@@ -194,7 +194,7 @@ public class TransporteController {
             // Realizar análisis de congestión
             CongestionAnalysisService.AnalisisCongestion analisis =
                 congestionService.analizarCongestion(
-                    transporteService.getGrafo(),
+                    transporteService.getGrafoCompleto(),
                     origen,
                     destino
                 );
