@@ -1,0 +1,1681 @@
+{
+  "objectIdFieldName": "objectid",
+  "globalIdFieldName": "globalid",
+  "geometryType": "esriGeometryPoint",
+  "spatialReference": {
+    "wkid": 4326,
+    "latestWkid": 4326
+  },
+  "fields": [
+    {
+      "name": "num_est",
+      "alias": "Número de estación",
+      "type": "esriFieldTypeString",
+      "length": 254
+    },
+    {
+      "name": "ub_est",
+      "alias": "Ubicación estación",
+      "type": "esriFieldTypeString",
+      "length": 255
+    },
+    {
+      "name": "nom_est",
+      "alias": "Nombre de la estación",
+      "type": "esriFieldTypeString",
+      "length": 254
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "num_est": "05101",
+        "ub_est": "AV Americas KR 73",
+        "nom_est": "Mandalay"
+      },
+      "geometry": {
+        "x": -74.1412981718073,
+        "y": 4.63086365746924
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07010",
+        "ub_est": "Soacha",
+        "nom_est": "Bosa"
+      },
+      "geometry": {
+        "x": -74.1812249985942,
+        "y": 4.59688794671187
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05002",
+        "ub_est": "AV Cali - CL 26 Sur",
+        "nom_est": "Biblioteca Tintal"
+      },
+      "geometry": {
+        "x": -74.1593524862983,
+        "y": 4.63790778225082
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05001",
+        "ub_est": "AV Cali - CL 40 Sur",
+        "nom_est": "Patio Bonito"
+      },
+      "geometry": {
+        "x": -74.1646142666045,
+        "y": 4.63318028291311
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02001",
+        "ub_est": "CL 184",
+        "nom_est": "Calle 187"
+      },
+      "geometry": {
+        "x": -74.0444437032235,
+        "y": 4.76333654832379
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07505",
+        "ub_est": "Soacha",
+        "nom_est": "León XIII"
+      },
+      "geometry": {
+        "x": -74.1931353130401,
+        "y": 4.59217281118029
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "14005",
+        "ub_est": "KR 3",
+        "nom_est": "Las Aguas - Centro Colombo Americano"
+      },
+      "geometry": {
+        "x": -74.0684014384212,
+        "y": 4.60257975657661
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03000",
+        "ub_est": "AV Suba AV Cali",
+        "nom_est": "Portal Suba"
+      },
+      "geometry": {
+        "x": -74.0942789036202,
+        "y": 4.74681507111009
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07009",
+        "ub_est": "Autosur - CL 17 S",
+        "nom_est": "SENA"
+      },
+      "geometry": {
+        "x": -74.1106425477745,
+        "y": 4.59737051091117
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "08002",
+        "ub_est": "CL 48A Sur",
+        "nom_est": "Biblioteca"
+      },
+      "geometry": {
+        "x": -74.1303886787077,
+        "y": 4.57030351923882
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03014",
+        "ub_est": "AV Suba - CL 81",
+        "nom_est": "San Martín"
+      },
+      "geometry": {
+        "x": -74.0671767378144,
+        "y": 4.67638965704051
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10006",
+        "ub_est": "KR 10 - CL 12",
+        "nom_est": "San Victorino"
+      },
+      "geometry": {
+        "x": -74.0774224243183,
+        "y": 4.60102943418401
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07504",
+        "ub_est": "Soacha",
+        "nom_est": "Terreros - Hospital Cardio Vascular"
+      },
+      "geometry": {
+        "x": -74.199522612371,
+        "y": 4.58896270426202
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02502",
+        "ub_est": "CL 190",
+        "nom_est": "Terminal"
+      },
+      "geometry": {
+        "x": -74.0435725482851,
+        "y": 4.76881876443823
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10008",
+        "ub_est": "KR 10 - CL 23",
+        "nom_est": "San Diego"
+      },
+      "geometry": {
+        "x": -74.0715000743494,
+        "y": 4.61089908616052
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09107",
+        "ub_est": "CL 1 Sur - CL 3 Sur",
+        "nom_est": "Hortúa"
+      },
+      "geometry": {
+        "x": -74.0902459983793,
+        "y": 4.59084725324995
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02300",
+        "ub_est": "CL 97",
+        "nom_est": "Calle 100 - Marketmedios"
+      },
+      "geometry": {
+        "x": -74.0577122977172,
+        "y": 4.68394943756498
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04102",
+        "ub_est": "TV 69 Bis",
+        "nom_est": "AV. Boyacá"
+      },
+      "geometry": {
+        "x": -74.0871319373017,
+        "y": 4.69393267967488
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "12000",
+        "ub_est": "CL 13 KR 47",
+        "nom_est": "Puente Aranda"
+      },
+      "geometry": {
+        "x": -74.1046394333394,
+        "y": 4.62566974221736
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09101",
+        "ub_est": "CL 31 Sur - CL 32 Sur",
+        "nom_est": "Quiroga"
+      },
+      "geometry": {
+        "x": -74.1143805058295,
+        "y": 4.57680972493108
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04105",
+        "ub_est": "KR 53",
+        "nom_est": "Carrera 53"
+      },
+      "geometry": {
+        "x": -74.0774214213623,
+        "y": 4.68180475388314
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05005",
+        "ub_est": "AV Americas - TV 86",
+        "nom_est": "Transversal 86"
+      },
+      "geometry": {
+        "x": -74.1520678362096,
+        "y": 4.63419465357297
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04108",
+        "ub_est": "TV 27",
+        "nom_est": "Polo - FINCOMERCIO"
+      },
+      "geometry": {
+        "x": -74.0643386605717,
+        "y": 4.67016265040912
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02201",
+        "ub_est": "CL 128 B",
+        "nom_est": "Prado"
+      },
+      "geometry": {
+        "x": -74.0525582922202,
+        "y": 4.71455842595272
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06001",
+        "ub_est": "KR 84",
+        "nom_est": "Modelia"
+      },
+      "geometry": {
+        "x": -74.1171471007253,
+        "y": 4.67502465872978
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02304",
+        "ub_est": "CL 80",
+        "nom_est": "Héroes"
+      },
+      "geometry": {
+        "x": -74.0603099513573,
+        "y": 4.66813602964769
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02102",
+        "ub_est": "CL 160",
+        "nom_est": "Calle 161"
+      },
+      "geometry": {
+        "x": -74.0480003495119,
+        "y": 4.7419152991913
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06111",
+        "ub_est": "KR 3",
+        "nom_est": "Universidades – CityU"
+      },
+      "geometry": {
+        "x": -74.0673158462673,
+        "y": 4.60464622533771
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05107",
+        "ub_est": "Americas - KR 53A",
+        "nom_est": "Distrito Grafiti"
+      },
+      "geometry": {
+        "x": -74.1115841068002,
+        "y": 4.62785004509268
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "12007",
+        "ub_est": "CL 13 - KR 38",
+        "nom_est": "Zona Industrial"
+      },
+      "geometry": {
+        "x": -74.0986861079417,
+        "y": 4.62032525820458
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09106",
+        "ub_est": "CL 8 Sur - CL 11 Sur",
+        "nom_est": "Nariño"
+      },
+      "geometry": {
+        "x": -74.0939254157307,
+        "y": 4.58628470770093
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09104",
+        "ub_est": "CL 19 Sur - AV 1 De M",
+        "nom_est": "Restrepo"
+      },
+      "geometry": {
+        "x": -74.1014287824331,
+        "y": 4.58184905728071
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07112",
+        "ub_est": "KR 30 - CL 6A",
+        "nom_est": "Comuneros"
+      },
+      "geometry": {
+        "x": -74.0998613741849,
+        "y": 4.60424997558367
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07506",
+        "ub_est": "Soacha",
+        "nom_est": "La Despensa"
+      },
+      "geometry": {
+        "x": -74.1881121817778,
+        "y": 4.59459381881802
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10010",
+        "ub_est": "KR 10 - CL 1B Sur",
+        "nom_est": "San Bernardo"
+      },
+      "geometry": {
+        "x": -74.0843273228905,
+        "y": 4.59019555653307
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "08000",
+        "ub_est": "AV Boyaca",
+        "nom_est": "Portal Tunal"
+      },
+      "geometry": {
+        "x": -74.1392402030571,
+        "y": 4.56957146403122
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07000",
+        "ub_est": "Autosur - KR 82",
+        "nom_est": "Portal Sur - JFK Coop. Financiera"
+      },
+      "geometry": {
+        "x": -74.1692978395344,
+        "y": 4.59693994516086
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03011",
+        "ub_est": "AV Suba - CL 100",
+        "nom_est": "Suba - Calle 100"
+      },
+      "geometry": {
+        "x": -74.0644428425322,
+        "y": 4.68696833873346
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05100",
+        "ub_est": "AV Americas - KR 78",
+        "nom_est": "Banderas"
+      },
+      "geometry": {
+        "x": -74.1457699625961,
+        "y": 4.63129453692299
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07200",
+        "ub_est": "KR 18",
+        "nom_est": "Tygua - San José"
+      },
+      "geometry": {
+        "x": -74.0887613910378,
+        "y": 4.59978720167279
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09100",
+        "ub_est": "CL 38 Sur - CL 40 Sur",
+        "nom_est": "Calle 40 Sur"
+      },
+      "geometry": {
+        "x": -74.1200792400251,
+        "y": 4.57579415170962
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10001",
+        "ub_est": "KR 10 - CL 28 Sur",
+        "nom_est": "Country Sur"
+      },
+      "geometry": {
+        "x": -74.0986341254258,
+        "y": 4.5714167336549
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "12002",
+        "ub_est": "AV Americas - KR 32",
+        "nom_est": "CDS - Carrera 32"
+      },
+      "geometry": {
+        "x": -74.0939648299603,
+        "y": 4.61611934374863
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03013",
+        "ub_est": "AV Suba - CL 87",
+        "nom_est": "Rionegro"
+      },
+      "geometry": {
+        "x": -74.0648166247719,
+        "y": 4.68035105705615
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05102",
+        "ub_est": "AV Americas - KR 71",
+        "nom_est": "AV. Américas - AV. Boyacá"
+      },
+      "geometry": {
+        "x": -74.1342245707021,
+        "y": 4.63011779842718
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06104",
+        "ub_est": "KR 54",
+        "nom_est": "Gobernación"
+      },
+      "geometry": {
+        "x": -74.0965377092931,
+        "y": 4.64283002475534
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07104",
+        "ub_est": "KR 30 - CL 63",
+        "nom_est": "7 de Agosto"
+      },
+      "geometry": {
+        "x": -74.0776864594114,
+        "y": 4.65729527991671
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07102",
+        "ub_est": "KR 30 - CL 75A",
+        "nom_est": "Calle 75 - Zona M"
+      },
+      "geometry": {
+        "x": -74.0713049150669,
+        "y": 4.67015101229951
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10002",
+        "ub_est": "AV 1 De Mayo Con KR 7",
+        "nom_est": "AV. 1 Mayo"
+      },
+      "geometry": {
+        "x": -74.0937094048318,
+        "y": 4.57693931436369
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09103",
+        "ub_est": "CL 24 Sur - CL 27 Sur",
+        "nom_est": "Olaya"
+      },
+      "geometry": {
+        "x": -74.1073638244642,
+        "y": 4.57891518891279
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07201",
+        "ub_est": "KR 27",
+        "nom_est": "Guatoque - Veraguas"
+      },
+      "geometry": {
+        "x": -74.0949331313006,
+        "y": 4.60417100878722
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10000",
+        "ub_est": "KR 5 A CL 33 Sur",
+        "nom_est": "Portal 20 de Julio"
+      },
+      "geometry": {
+        "x": -74.0970084060051,
+        "y": 4.56571811871574
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05105",
+        "ub_est": "AV Americas - KR 64",
+        "nom_est": "Pradera - Plaza Central"
+      },
+      "geometry": {
+        "x": -74.1186771327362,
+        "y": 4.62850646394008
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05103",
+        "ub_est": "AV Americas - KR 69C",
+        "nom_est": "Marsella"
+      },
+      "geometry": {
+        "x": -74.1301638463248,
+        "y": 4.62967723052184
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07008",
+        "ub_est": "Autosur - DG 26 Sur",
+        "nom_est": "NQS - Calle 30 S"
+      },
+      "geometry": {
+        "x": -74.1178807462295,
+        "y": 4.59479846614018
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10005",
+        "ub_est": "KR 10 - CL 5",
+        "nom_est": "Bicentenario"
+      },
+      "geometry": {
+        "x": -74.0818354237853,
+        "y": 4.5940207719573
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07006",
+        "ub_est": "Autosur - KR 43",
+        "nom_est": "General Santander"
+      },
+      "geometry": {
+        "x": -74.1295449558252,
+        "y": 4.59355114101679
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04000",
+        "ub_est": "KR 96",
+        "nom_est": "Portal 80"
+      },
+      "geometry": {
+        "x": -74.1105062688258,
+        "y": 4.70982948798456
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06100",
+        "ub_est": "CL 26 - KR 69 D",
+        "nom_est": "Avenida Rojas - UNISALESIANA"
+      },
+      "geometry": {
+        "x": -74.1087719987013,
+        "y": 4.66194443912793
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10003",
+        "ub_est": "KR 10 - CL 12 Sur",
+        "nom_est": "Ciudad Jardín - UAN"
+      },
+      "geometry": {
+        "x": -74.0903515982235,
+        "y": 4.58154254092184
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04003",
+        "ub_est": "KR 86",
+        "nom_est": "AV. Cali"
+      },
+      "geometry": {
+        "x": -74.1002896453428,
+        "y": 4.70248285051076
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07103",
+        "ub_est": "KR 30 - CL 72",
+        "nom_est": "AV. Chile"
+      },
+      "geometry": {
+        "x": -74.074574552883,
+        "y": 4.66635264143611
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07111",
+        "ub_est": "KR 30 - CL 10",
+        "nom_est": "Ricaurte - NQS"
+      },
+      "geometry": {
+        "x": -74.0938659494234,
+        "y": 4.61168378444903
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06105",
+        "ub_est": "KR 47",
+        "nom_est": "Quinta Paredes"
+      },
+      "geometry": {
+        "x": -74.0931322631955,
+        "y": 4.63750352799929
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07004",
+        "ub_est": "Autosur - AV 54",
+        "nom_est": "Venecia"
+      },
+      "geometry": {
+        "x": -74.1426492141672,
+        "y": 4.59556282898462
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02204",
+        "ub_est": "CL 116",
+        "nom_est": "Pepe Sierra"
+      },
+      "geometry": {
+        "x": -74.055308799802,
+        "y": 4.69812688976077
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06101",
+        "ub_est": "KR 68D",
+        "nom_est": "El Tiempo – Cámara de Comercio de Bogotá"
+      },
+      "geometry": {
+        "x": -74.105646659789,
+        "y": 4.6570670471491
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07101",
+        "ub_est": "KR 30 KR 24",
+        "nom_est": "La Castellana"
+      },
+      "geometry": {
+        "x": -74.0644431694531,
+        "y": 4.67561115498197
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09004",
+        "ub_est": "CL 46A Sur - Diagonal 4",
+        "nom_est": "Santa Lucía"
+      },
+      "geometry": {
+        "x": -74.1247087189849,
+        "y": 4.57096848357716
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02200",
+        "ub_est": "CL 137",
+        "nom_est": "Alcalá – Colegio S. Tomás Dominicos"
+      },
+      "geometry": {
+        "x": -74.0514591630178,
+        "y": 4.72115819776258
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10007",
+        "ub_est": "KR 10 - CL 18",
+        "nom_est": "Las Nieves"
+      },
+      "geometry": {
+        "x": -74.074326748939,
+        "y": 4.60606533505713
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07113",
+        "ub_est": "KR 30 AV 3",
+        "nom_est": "Santa Isabel"
+      },
+      "geometry": {
+        "x": -74.1026175490356,
+        "y": 4.60167502561994
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "08001",
+        "ub_est": "CL 55 Sur",
+        "nom_est": "Parque"
+      },
+      "geometry": {
+        "x": -74.1354145132073,
+        "y": 4.56832656375345
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04103",
+        "ub_est": "TV 67 Bis",
+        "nom_est": "Ferias"
+      },
+      "geometry": {
+        "x": -74.0846012702891,
+        "y": 4.69088592669265
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06002",
+        "ub_est": "KR 73A",
+        "nom_est": "Normandía"
+      },
+      "geometry": {
+        "x": -74.1132800303764,
+        "y": 4.6690086813763
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04101",
+        "ub_est": "KR 73 A",
+        "nom_est": "Minuto de Dios"
+      },
+      "geometry": {
+        "x": -74.0919328488889,
+        "y": 4.6968816015439
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02303",
+        "ub_est": "CL 85",
+        "nom_est": "Calle 85"
+      },
+      "geometry": {
+        "x": -74.0596436310793,
+        "y": 4.67231278674047
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "12001",
+        "ub_est": "AV Americas - KR 43",
+        "nom_est": "Carrera 43 - Comapan"
+      },
+      "geometry": {
+        "x": -74.1014378779099,
+        "y": 4.62278153734826
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "05000",
+        "ub_est": "AV Cali - CL 43 Sur",
+        "nom_est": "Portal Américas"
+      },
+      "geometry": {
+        "x": -74.1730584641131,
+        "y": 4.62938131020262
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09118",
+        "ub_est": "CL 51 - CL 49",
+        "nom_est": "Marly"
+      },
+      "geometry": {
+        "x": -74.066787952473,
+        "y": 4.6375590455397
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07106",
+        "ub_est": "KR 30 - CL 53",
+        "nom_est": "Campín - UAN"
+      },
+      "geometry": {
+        "x": -74.0787100914556,
+        "y": 4.64539756388144
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04100",
+        "ub_est": "KR 77 Bis",
+        "nom_est": "Granja - Kr 77"
+      },
+      "geometry": {
+        "x": -74.0960182816602,
+        "y": 4.69915010585671
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04001",
+        "ub_est": "KR 94",
+        "nom_est": "Quirigua"
+      },
+      "geometry": {
+        "x": -74.1087393232386,
+        "y": 4.70672524515225
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03006",
+        "ub_est": "AV Suba - CL 127",
+        "nom_est": "Niza - Calle 127"
+      },
+      "geometry": {
+        "x": -74.0723071978444,
+        "y": 4.71200123132396
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03001",
+        "ub_est": "AV Suba - KR 98A",
+        "nom_est": "La Campiña"
+      },
+      "geometry": {
+        "x": -74.091200962308,
+        "y": 4.74265373470601
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06106",
+        "ub_est": "KR 43",
+        "nom_est": "Corferias"
+      },
+      "geometry": {
+        "x": -74.0897008480442,
+        "y": 4.63430649029258
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06107",
+        "ub_est": "KR 34",
+        "nom_est": "Ciudad Universitaria - Lotería de Bogotá"
+      },
+      "geometry": {
+        "x": -74.0835272349907,
+        "y": 4.63087542961679
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07107",
+        "ub_est": "KR 30 - CL 45",
+        "nom_est": "Universidad Nacional"
+      },
+      "geometry": {
+        "x": -74.0793261798065,
+        "y": 4.63712104779828
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06108",
+        "ub_est": "CL 38",
+        "nom_est": "Concejo de Bogotá"
+      },
+      "geometry": {
+        "x": -74.0802896589531,
+        "y": 4.6259873656836
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07007",
+        "ub_est": "Autosur - KR 39A",
+        "nom_est": "NQS - Calle 38A S"
+      },
+      "geometry": {
+        "x": -74.123755076579,
+        "y": 4.59380943872615
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04104",
+        "ub_est": "KR 68D",
+        "nom_est": "AV. 68"
+      },
+      "geometry": {
+        "x": -74.0807664211715,
+        "y": 4.68610283978296
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06102",
+        "ub_est": "KR 66",
+        "nom_est": "Salitre - El Greco"
+      },
+      "geometry": {
+        "x": -74.1016488189854,
+        "y": 4.65086482005442
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07110",
+        "ub_est": "KR 30 - CL 19",
+        "nom_est": "Paloquemao"
+      },
+      "geometry": {
+        "x": -74.089553444556,
+        "y": 4.6169218769153
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04002",
+        "ub_est": "KR 90",
+        "nom_est": "Carrera 90"
+      },
+      "geometry": {
+        "x": -74.1045702655012,
+        "y": 4.70466646086656
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04107",
+        "ub_est": "KR 40",
+        "nom_est": "Escuela Militar"
+      },
+      "geometry": {
+        "x": -74.0698021510503,
+        "y": 4.67553501201799
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03002",
+        "ub_est": "AV Suba KR 90",
+        "nom_est": "Suba - TV. 91"
+      },
+      "geometry": {
+        "x": -74.0869922837974,
+        "y": 4.73893678616015
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "12003",
+        "ub_est": "CL 13 - KR 28",
+        "nom_est": "Ricaurte - CL 13"
+      },
+      "geometry": {
+        "x": -74.0904764979636,
+        "y": 4.61301797682053
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02302",
+        "ub_est": "CL 90",
+        "nom_est": "Virrey"
+      },
+      "geometry": {
+        "x": -74.0590195170969,
+        "y": 4.67599737086264
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02101",
+        "ub_est": "CL 165",
+        "nom_est": "Toberin - Foundever"
+      },
+      "geometry": {
+        "x": -74.0472548477941,
+        "y": 4.74618497888188
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02105",
+        "ub_est": "CL 142",
+        "nom_est": "Calle 142"
+      },
+      "geometry": {
+        "x": -74.0505033318998,
+        "y": 4.72685008963786
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02104",
+        "ub_est": "CL 146",
+        "nom_est": "Calle 146"
+      },
+      "geometry": {
+        "x": -74.0498112285539,
+        "y": 4.73089106415821
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02202",
+        "ub_est": "CL 127",
+        "nom_est": "Calle 127"
+      },
+      "geometry": {
+        "x": -74.0542251639966,
+        "y": 4.70463963646549
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02103",
+        "ub_est": "CL 152",
+        "nom_est": "Mazurén"
+      },
+      "geometry": {
+        "x": -74.0492262363895,
+        "y": 4.73458855421922
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09117",
+        "ub_est": "CL 45 - CL 42A",
+        "nom_est": "Calle 45 - American School Way"
+      },
+      "geometry": {
+        "x": -74.0678787232803,
+        "y": 4.63145241287829
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "14001",
+        "ub_est": "CL 13 - KR 16",
+        "nom_est": "De La Sabana"
+      },
+      "geometry": {
+        "x": -74.0818942710336,
+        "y": 4.60542110025743
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09122",
+        "ub_est": "CL 72 - CL 70A",
+        "nom_est": "Calle 72"
+      },
+      "geometry": {
+        "x": -74.0620678608516,
+        "y": 4.6582375457048
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06109",
+        "ub_est": "KR 20",
+        "nom_est": "Centro Memoria"
+      },
+      "geometry": {
+        "x": -74.0763205929106,
+        "y": 4.62046499475027
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09002",
+        "ub_est": "KR 11A - KR 10C",
+        "nom_est": "Consuelo"
+      },
+      "geometry": {
+        "x": -74.1238738525557,
+        "y": 4.56022754400784
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09110",
+        "ub_est": "CL 13 - CL 11",
+        "nom_est": "AV. Jiménez - Caracas"
+      },
+      "geometry": {
+        "x": -74.0804099542803,
+        "y": 4.60286688064786
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07108",
+        "ub_est": "KR 30 AV 28",
+        "nom_est": "AV. ElDorado"
+      },
+      "geometry": {
+        "x": -74.0798785678313,
+        "y": 4.6306684130358
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09114",
+        "ub_est": "AV Calle 28 - CL 2",
+        "nom_est": "Calle 26"
+      },
+      "geometry": {
+        "x": -74.0721584580698,
+        "y": 4.61665154843011
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07005",
+        "ub_est": "Autosur - KR 48",
+        "nom_est": "Alquería"
+      },
+      "geometry": {
+        "x": -74.1342699273245,
+        "y": 4.59426993454636
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07109",
+        "ub_est": "KR 30 - CL 26",
+        "nom_est": "CAD"
+      },
+      "geometry": {
+        "x": -74.0841812050935,
+        "y": 4.62341573131732
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "14003",
+        "ub_est": "CL 13 - Caracas",
+        "nom_est": "AV. Jiménez - CL 13"
+      },
+      "geometry": {
+        "x": -74.0790927833708,
+        "y": 4.60305325063616
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07105",
+        "ub_est": "KR 30 - CL 57",
+        "nom_est": "Movistar Arena"
+      },
+      "geometry": {
+        "x": -74.0783624591098,
+        "y": 4.65003984534644
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09123",
+        "ub_est": "CL 76 - CL 74",
+        "nom_est": "Calle 76 - San Felipe"
+      },
+      "geometry": {
+        "x": -74.061261261576,
+        "y": 4.66302944992869
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09120",
+        "ub_est": "CL 63 - CL 60",
+        "nom_est": "Calle 63"
+      },
+      "geometry": {
+        "x": -74.0648705348437,
+        "y": 4.6484039699219
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "04106",
+        "ub_est": "KR 46",
+        "nom_est": "Carrera 47"
+      },
+      "geometry": {
+        "x": -74.0732547609495,
+        "y": 4.67775574612718
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09001",
+        "ub_est": "KR 9A",
+        "nom_est": "Molinos"
+      },
+      "geometry": {
+        "x": -74.1218277888683,
+        "y": 4.55706456400237
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03004",
+        "ub_est": "AV Suba - CL 135",
+        "nom_est": "Gratamira"
+      },
+      "geometry": {
+        "x": -74.0747233385483,
+        "y": 4.72745584078125
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09121",
+        "ub_est": "CL 69 - CL 67",
+        "nom_est": "Flores – Areandina"
+      },
+      "geometry": {
+        "x": -74.0630091324649,
+        "y": 4.65490299283246
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "14004",
+        "ub_est": "KR 2",
+        "nom_est": "Museo del Oro"
+      },
+      "geometry": {
+        "x": -74.0729084338437,
+        "y": 4.60115297896314
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03007",
+        "ub_est": "AV Suba - CL 119",
+        "nom_est": "Humedal Córdoba"
+      },
+      "geometry": {
+        "x": -74.0711742661356,
+        "y": 4.70668982252866
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10004",
+        "ub_est": "KR 10 - CL 3 Sur",
+        "nom_est": "Policarpa"
+      },
+      "geometry": {
+        "x": -74.0870659072425,
+        "y": 4.58614878966447
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07001",
+        "ub_est": "Autosur - KR 78C",
+        "nom_est": "Perdomo"
+      },
+      "geometry": {
+        "x": -74.1649697299199,
+        "y": 4.59578778453872
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09105",
+        "ub_est": "CL 13 Sur - CL 16 Sur",
+        "nom_est": "Fucha"
+      },
+      "geometry": {
+        "x": -74.0994017537384,
+        "y": 4.58297257638977
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03005",
+        "ub_est": "AV Suba AV Boyaca",
+        "nom_est": "Suba - AV. Boyacá"
+      },
+      "geometry": {
+        "x": -74.0747116339291,
+        "y": 4.7212671582572
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03012",
+        "ub_est": "AV Suba - CL 97",
+        "nom_est": "Suba - Calle 95"
+      },
+      "geometry": {
+        "x": -74.0632182709312,
+        "y": 4.68469463726369
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03010",
+        "ub_est": "AV Suba TV 48",
+        "nom_est": "Puentelargo"
+      },
+      "geometry": {
+        "x": -74.0672087399582,
+        "y": 4.69340077105885
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07002",
+        "ub_est": "Autosur - KR 67",
+        "nom_est": "CC Paseo Villa del Río - Madelena"
+      },
+      "geometry": {
+        "x": -74.1568810548387,
+        "y": 4.59628094025897
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07503",
+        "ub_est": "Soacha",
+        "nom_est": "San Mateo - CC Unisur"
+      },
+      "geometry": {
+        "x": -74.205449736069,
+        "y": 4.5859606440433
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "07003",
+        "ub_est": "Sevillana",
+        "nom_est": "Sevillana"
+      },
+      "geometry": {
+        "x": -74.1474102875462,
+        "y": 4.59510726281336
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03009",
+        "ub_est": "AV Suba CLL 114",
+        "nom_est": "Suba - Calle 116"
+      },
+      "geometry": {
+        "x": -74.0698439417815,
+        "y": 4.69924110839765
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "12004",
+        "ub_est": "AV Americas - KR 22",
+        "nom_est": "San Facon Carrera 22"
+      },
+      "geometry": {
+        "x": -74.0867947813114,
+        "y": 4.60973520557746
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09003",
+        "ub_est": "KR 13B - KR 13C",
+        "nom_est": "Socorro"
+      },
+      "geometry": {
+        "x": -74.1255839351577,
+        "y": 4.56465327589726
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "03003",
+        "ub_est": "AV Suba - CL 136",
+        "nom_est": "21 Ángeles"
+      },
+      "geometry": {
+        "x": -74.080986522776,
+        "y": 4.73550811160933
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09000",
+        "ub_est": "CL 65C Sur",
+        "nom_est": "Portal Usme"
+      },
+      "geometry": {
+        "x": -74.1193909908661,
+        "y": 4.53171458394509
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06103",
+        "ub_est": "KR 60",
+        "nom_est": "CAN"
+      },
+      "geometry": {
+        "x": -74.0990464513488,
+        "y": 4.64687639380847
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "06000",
+        "ub_est": "KR 87",
+        "nom_est": "Portal El Dorado – C.C. Nuestro Bogotá"
+      },
+      "geometry": {
+        "x": -74.1213980169888,
+        "y": 4.68162202894415
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09109",
+        "ub_est": "CL 8 - CL 6",
+        "nom_est": "Tercer Milenio"
+      },
+      "geometry": {
+        "x": -74.0838362507511,
+        "y": 4.59813500835274
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09111",
+        "ub_est": "CL 19 - CL 17",
+        "nom_est": "Calle 19"
+      },
+      "geometry": {
+        "x": -74.0768696779543,
+        "y": 4.60786462213816
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09116",
+        "ub_est": "AV 39 - AV Calle",
+        "nom_est": "AV. 39"
+      },
+      "geometry": {
+        "x": -74.0686967905327,
+        "y": 4.62689717555447
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "9005",
+        "ub_est": null,
+        "nom_est": "Danubio"
+      },
+      "geometry": {
+        "x": -74.1208515885869,
+        "y": 4.54365432858043
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09108",
+        "ub_est": "CL 4 - CL 2",
+        "nom_est": "Hospital"
+      },
+      "geometry": {
+        "x": -74.0862262890248,
+        "y": 4.59505051525053
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02000",
+        "ub_est": "CL 173",
+        "nom_est": "Portal Norte – Unicervantes"
+      },
+      "geometry": {
+        "x": -74.0460446492474,
+        "y": 4.75462286021802
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "02205",
+        "ub_est": "CL 106",
+        "nom_est": "Calle 106 - Maletas Explora"
+      },
+      "geometry": {
+        "x": -74.056182433073,
+        "y": 4.69298260043902
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "10009",
+        "ub_est": "KR 7 - CL 32",
+        "nom_est": "Museo Nacional - FNG"
+      },
+      "geometry": {
+        "x": -74.069226468449,
+        "y": 4.61524712852972
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09119",
+        "ub_est": "CL 57 - CL 54",
+        "nom_est": "Temporal Calle 57"
+      },
+      "geometry": {
+        "x": -74.0658282578455,
+        "y": 4.64298162319531
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09118",
+        "ub_est": "CL 51 - CL 49",
+        "nom_est": "Temporal Marly"
+      },
+      "geometry": {
+        "x": -74.066787952473,
+        "y": 4.6375590455397
+      }
+    },
+    {
+      "attributes": {
+        "num_est": "09115",
+        "ub_est": "AV Calle 34 - CL 3",
+        "nom_est": "Temporal Calle 34"
+      },
+      "geometry": {
+        "x": -74.0697191791143,
+        "y": 4.6215755104849
+      }
+    }
+  ]
+}

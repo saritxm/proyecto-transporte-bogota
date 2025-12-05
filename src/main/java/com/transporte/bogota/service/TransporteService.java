@@ -31,12 +31,14 @@ public class TransporteService {
     private static final Logger logger = LoggerFactory.getLogger(TransporteService.class);
 
     private final CSVDataLoader dataLoader;
+    private final EstacionIndexService indexService;
     private SistemaTransporte sistema;
     private Graph grafo;
     private Map<String, Object> analysisResults; // Campo para almacenar resultados de análisis
 
-    public TransporteService(CSVDataLoader dataLoader) {
+    public TransporteService(CSVDataLoader dataLoader, EstacionIndexService indexService) {
         this.dataLoader = dataLoader;
+        this.indexService = indexService;
         this.analysisResults = new HashMap<>();
     }
 
@@ -192,6 +194,78 @@ public class TransporteService {
 
     public Collection<Estacion> getEstaciones() {
         return sistema.getAllEstaciones();
+    }
+
+    /**
+     * Búsqueda de estaciones por nombre usando índice B+ para búsqueda O(log n).
+     * Busca primero en estaciones cargadas (TM, Metro, Portales), luego en índice SITP.
+     */
+    public List<Map<String, Object>> buscarEstaciones(String query, int limit) {
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String queryLower = query.toLowerCase().trim();
+
+        // 1. Buscar en estaciones principales ya cargadas (TM, Metro, Portales)
+        List<Map<String, Object>> resultados = sistema.getAllEstaciones().stream()
+                .filter(e -> e.getNombre().toLowerCase().contains(queryLower) ||
+                             e.getId().toLowerCase().contains(queryLower))
+                .limit(limit)
+                .map(this::crearEstacionDTO)
+                .collect(Collectors.toList());
+
+        logger.debug("Búsqueda '{}': {} resultados en estaciones principales", query, resultados.size());
+
+        // 2. Si no hay suficientes resultados, buscar en índice SITP (B+ tree)
+        if (resultados.size() < limit) {
+            try {
+                int restantes = limit - resultados.size();
+                List<Map<String, Object>> sitpResults = indexService.buscar(queryLower, restantes);
+                resultados.addAll(sitpResults);
+                logger.debug("Búsqueda '{}': {} resultados adicionales en SITP", query, sitpResults.size());
+            } catch (Exception e) {
+                logger.warn("Error al buscar en índice SITP: {}", e.getMessage());
+            }
+        }
+
+        logger.info("Búsqueda '{}': {} resultados totales", query, resultados.size());
+        return resultados;
+    }
+
+    /**
+     * Obtiene estaciones paginadas (evita cargar todas en memoria del cliente).
+     */
+    public Map<String, Object> getEstacionesPaginadas(int page, int size) {
+        List<Estacion> todasEstaciones = new ArrayList<>(sistema.getAllEstaciones());
+        int total = todasEstaciones.size();
+        int inicio = page * size;
+        int fin = Math.min(inicio + size, total);
+
+        List<Map<String, Object>> estaciones = todasEstaciones.subList(inicio, fin).stream()
+                .map(this::crearEstacionDTO)
+                .collect(Collectors.toList());
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("estaciones", estaciones);
+        resultado.put("total", total);
+        resultado.put("page", page);
+        resultado.put("size", size);
+        resultado.put("totalPages", (int) Math.ceil((double) total / size));
+
+        return resultado;
+    }
+
+    /**
+     * Obtiene solo estaciones principales (portales, intermodales, metro) para carga inicial.
+     */
+    public List<Map<String, Object>> getEstacionesPrincipales() {
+        return sistema.getAllEstaciones().stream()
+                .filter(e -> "portal".equals(e.getTipo()) ||
+                             "intermodal".equals(e.getTipo()) ||
+                             "metro".equals(e.getTipo()))
+                .map(this::crearEstacionDTO)
+                .collect(Collectors.toList());
     }
 
     public Collection<Ruta> getRutas() {

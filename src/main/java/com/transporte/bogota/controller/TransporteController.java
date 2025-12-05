@@ -3,12 +3,11 @@ package com.transporte.bogota.controller;
 import com.transporte.bogota.model.Estacion;
 import com.transporte.bogota.service.TransporteService;
 import com.transporte.bogota.service.CongestionAnalysisService;
+import com.transporte.bogota.service.EstacionIndexService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Controlador REST para exponer la API de gestión y optimización del sistema de transporte.
@@ -19,10 +18,14 @@ public class TransporteController {
 
     private final TransporteService transporteService;
     private final CongestionAnalysisService congestionService;
+    private final EstacionIndexService indexService;
 
-    public TransporteController(TransporteService transporteService, CongestionAnalysisService congestionService) {
+    public TransporteController(TransporteService transporteService,
+                                CongestionAnalysisService congestionService,
+                                EstacionIndexService indexService) {
         this.transporteService = transporteService;
         this.congestionService = congestionService;
+        this.indexService = indexService;
     }
 
     // =========================================================================
@@ -31,10 +34,50 @@ public class TransporteController {
 
     /**
      * Obtiene todas las estaciones del sistema.
+     * DEPRECATED: Usar /estaciones/principales o /estaciones/buscar para evitar sobrecarga.
      */
     @GetMapping("/estaciones")
     public Collection<Estacion> getEstaciones() {
         return transporteService.getEstaciones();
+    }
+
+    /**
+     * Obtiene solo estaciones principales (portales, intermodales, metro).
+     * Ideal para carga inicial del mapa.
+     */
+    @GetMapping("/estaciones/principales")
+    public ResponseEntity<List<Map<String, Object>>> getEstacionesPrincipales() {
+        return ResponseEntity.ok(transporteService.getEstacionesPrincipales());
+    }
+
+    /**
+     * Búsqueda de estaciones por nombre o ID.
+     * http://localhost:8080/api/transporte/estaciones/buscar?q=portal&limit=20
+     */
+    @GetMapping("/estaciones/buscar")
+    public ResponseEntity<List<Map<String, Object>>> buscarEstaciones(
+            @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false, defaultValue = "20") int limit) {
+
+        if (limit > 100) limit = 100; // Máximo 100 resultados
+
+        List<Map<String, Object>> resultados = transporteService.buscarEstaciones(q, limit);
+        return ResponseEntity.ok(resultados);
+    }
+
+    /**
+     * Obtiene estaciones paginadas.
+     * http://localhost:8080/api/transporte/estaciones/pagina?page=0&size=50
+     */
+    @GetMapping("/estaciones/pagina")
+    public ResponseEntity<Map<String, Object>> getEstacionesPaginadas(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "50") int size) {
+
+        if (size > 200) size = 200; // Máximo 200 por página
+
+        Map<String, Object> resultado = transporteService.getEstacionesPaginadas(page, size);
+        return ResponseEntity.ok(resultado);
     }
 
     /**
@@ -60,6 +103,18 @@ public class TransporteController {
     @GetMapping("/estadisticas")
     public Map<String, Object> getEstadisticas() {
         return transporteService.getEstadisticas();
+    }
+
+    /**
+     * Obtiene estadísticas del índice B+ de estaciones SITP.
+     * Útil para debugging y verificación del sistema de indexación.
+     */
+    @GetMapping("/estadisticas/indice")
+    public Map<String, Object> getEstadisticasIndice() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalEstacionesSITP", indexService.getTotalEstaciones());
+        stats.putAll(indexService.getEstadisticas());
+        return stats;
     }
 
     // =========================================================================

@@ -11,15 +11,16 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Almacenamiento de datos
-let estaciones = [];
-let rutas = [];
+let estacionesPrincipales = []; // Solo principales para vista inicial
 let markers = {};
+let markersLayer = L.layerGroup().addTo(map);
 let rutaLayer = null;
-let armLayer = null; // Capa para dibujar el ARM
+let cuellosLayer = null;
 
 // Colores por tipo de estación
 const COLORES = {
     'metro': '#2196F3',
+    'portal': '#9C27B0',
     'tm': '#F44336',
     'sitp': '#4CAF50',
     'intermodal': '#FF9800'
@@ -30,32 +31,16 @@ const COLORES = {
 // =========================================================================
 
 async function init() {
-    showLoading(true);
     try {
+        console.log('Inicializando aplicación...');
         await cargarEstadisticas();
-        await cargarEstaciones();
-        await cargarRutas();
-        dibujarEstaciones();
-        dibujarRutas();
-        
-        // Ejecutar los algoritmos globales al inicio (ARM y Coloreado)
-        await calcularARM();
-        await calcularColoreado();
-        
+        await cargarEstacionesPrincipales();
+        configurarBuscador();
+        configurarEventos();
+        console.log('Aplicación inicializada');
     } catch (error) {
         console.error('Error al inicializar:', error);
-        alert('Error al cargar datos del sistema: ' + error.message);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showLoading(show) {
-    const loading = document.getElementById('loading');
-    if (show) {
-        loading.classList.add('active');
-    } else {
-        loading.classList.remove('active');
+        alert('Error al cargar datos: ' + error.message);
     }
 }
 
@@ -66,77 +51,85 @@ async function cargarEstadisticas() {
 
     const grid = document.getElementById('stats-grid');
     grid.innerHTML = `
-        <div class="stat-card">
-            <div class="stat-value">${stats.totalEstaciones}</div>
-            <div class="stat-label">Estaciones</div>
+        <div class="p-3 bg-blue-50 rounded-lg">
+            <div class="text-2xl font-bold text-blue-700">${stats.totalEstaciones || 0}</div>
+            <div class="text-xs text-gray-600">Estaciones</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value">${stats.totalRutas}</div>
-            <div class="stat-label">Rutas</div>
+        <div class="p-3 bg-green-50 rounded-lg">
+            <div class="text-2xl font-bold text-green-700">${stats.totalRutas || 0}</div>
+            <div class="text-xs text-gray-600">Rutas</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value">${stats.totalLineas}</div>
-            <div class="stat-label">Líneas</div>
+        <div class="p-3 bg-purple-50 rounded-lg">
+            <div class="text-2xl font-bold text-purple-700">${(stats.capacidadTotal / 1000000).toFixed(1)}M</div>
+            <div class="text-xs text-gray-600">Capacidad</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value">${(stats.capacidadTotal / 1000).toFixed(0)}K</div>
-            <div class="stat-label">Capacidad Total</div>
+        <div class="p-3 bg-amber-50 rounded-lg">
+            <div class="text-2xl font-bold text-amber-700">${stats.totalLineas || 0}</div>
+            <div class="text-xs text-gray-600">Líneas</div>
         </div>
     `;
 }
 
-// Cargar estaciones (y llenar selectores)
-async function cargarEstaciones() {
-    const response = await fetch(`${API_URL}/estaciones`);
-    estaciones = await response.json();
+// Cargar solo estaciones principales
+async function cargarEstacionesPrincipales() {
+    console.log('Cargando estaciones principales...');
+    const response = await fetch(`${API_URL}/estaciones/principales`);
+    estacionesPrincipales = await response.json();
 
-    // Llenar selectores
-    const selectores = ['origen', 'destino', 'origen-flujo', 'destino-flujo'];
-    
-    selectores.forEach(id => {
-        const select = document.getElementById(id);
-        if (select) {
-            select.innerHTML = `<option value="">Seleccione...</option>`; // Reset
-            estaciones.forEach(estacion => {
-                const option = new Option(`${estacion.nombre} (${estacion.tipo.toUpperCase()})`, estacion.id);
-                select.add(option);
-            });
-        }
-    });
+    console.log(`${estacionesPrincipales.length} estaciones principales cargadas`);
+    dibujarEstaciones(estacionesPrincipales);
+    llenarSelectores(estacionesPrincipales);
 }
 
-// Cargar rutas
-async function cargarRutas() {
-    const response = await fetch(`${API_URL}/rutas`);
-    rutas = await response.json();
+function llenarSelectores(estaciones) {
+    const selectOrigen = document.getElementById('select-origen');
+    const selectDestino = document.getElementById('select-destino');
+
+    selectOrigen.innerHTML = '<option value="" disabled selected>Seleccione Origen</option>';
+    selectDestino.innerHTML = '<option value="" disabled selected>Seleccione Destino</option>';
+
+    estaciones.forEach(estacion => {
+        const optOrigen = document.createElement('option');
+        optOrigen.value = estacion.id;
+        optOrigen.textContent = `${estacion.nombre} (${estacion.tipo})`;
+        selectOrigen.appendChild(optOrigen);
+
+        const optDestino = document.createElement('option');
+        optDestino.value = estacion.id;
+        optDestino.textContent = `${estacion.nombre} (${estacion.tipo})`;
+        selectDestino.appendChild(optDestino);
+    });
 }
 
 // =========================================================================
 // FUNCIONES DE DIBUJO EN MAPA (LEAFLET)
 // =========================================================================
 
-function dibujarEstaciones() {
-    // Reset markers para evitar duplicados si se llama de nuevo
-    Object.values(markers).forEach(marker => map.removeLayer(marker));
+function dibujarEstaciones(estaciones) {
+    markersLayer.clearLayers();
     markers = {};
-    
+
     estaciones.forEach(estacion => {
+        const color = COLORES[estacion.tipo] || '#666';
+        const radius = estacion.tipo === 'portal' ? 8 :
+                      estacion.tipo === 'intermodal' ? 7 :
+                      estacion.tipo === 'metro' ? 6 : 5;
+
         const marker = L.circleMarker([estacion.latitud, estacion.longitud], {
-            radius: 8,
-            fillColor: COLORES[estacion.tipo] || '#999',
+            radius: radius,
+            fillColor: color,
             color: '#fff',
             weight: 2,
             opacity: 1,
             fillOpacity: 0.8
-        }).addTo(map);
+        });
 
         marker.bindPopup(`
-            <b>${estacion.nombre}</b><br>
-            <b>Tipo:</b> ${estacion.tipo.toUpperCase()}<br>
-            <b>Capacidad Estación:</b> ${estacion.capacidad} pasajeros<br>
-            <b>ID:</b> ${estacion.id}
+            <div class="font-semibold">${estacion.nombre}</div>
+            <div class="text-xs text-gray-600">${estacion.tipo.toUpperCase()} - ${estacion.id}</div>
         `);
 
+        marker.addTo(markersLayer);
         markers[estacion.id] = marker;
     });
 }
@@ -433,5 +426,288 @@ function calcularTransferencias(camino) {
     return transferencias;
 }
 
-// Iniciar aplicación cuando cargue la página
+// =========================================================================
+// BÚSQUEDA DE ESTACIONES
+// =========================================================================
+
+function configurarBuscador() {
+    const searchInput = document.getElementById('search-stations');
+    const searchResults = document.getElementById('search-results');
+
+    if (!searchInput || !searchResults) {
+        console.error('❌ Elementos de búsqueda no encontrados:', { searchInput, searchResults });
+        return;
+    }
+
+    console.log('✅ Buscador configurado correctamente');
+
+    let timeoutId = null;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(timeoutId);
+
+        if (query.length < 2) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        timeoutId = setTimeout(() => buscarEstaciones(query), 300);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+}
+
+async function buscarEstaciones(query) {
+    const searchResults = document.getElementById('search-results');
+    console.log('🔍 Buscando:', query);
+
+    try {
+        const url = `${API_URL}/estaciones/buscar?q=${encodeURIComponent(query)}&limit=20`;
+        console.log('📡 URL:', url);
+        const response = await fetch(url);
+        const estaciones = await response.json();
+        console.log('📦 Resultados:', estaciones.length, estaciones);
+
+        if (estaciones.length === 0) {
+            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-sm">No se encontraron resultados</div>';
+            searchResults.classList.remove('hidden');
+            return;
+        }
+
+        searchResults.innerHTML = estaciones.map(estacion => `
+            <div class="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0 flex items-center justify-between"
+                 onclick="seleccionarEstacionDesdeBusqueda('${estacion.id}', '${escapeHtml(estacion.nombre)}', '${estacion.tipo}', ${estacion.latitud}, ${estacion.longitud})">
+                <div>
+                    <div class="font-medium text-sm">${estacion.nombre}</div>
+                    <div class="text-xs text-gray-500">${estacion.tipo.toUpperCase()} - ${estacion.id}</div>
+                </div>
+                <div class="w-3 h-3 rounded-full" style="background-color: ${COLORES[estacion.tipo] || '#666'}"></div>
+            </div>
+        `).join('');
+
+        searchResults.classList.remove('hidden');
+    } catch (error) {
+        console.error('Error al buscar:', error);
+        searchResults.innerHTML = '<div class="p-3 text-red-500 text-sm">Error en la búsqueda</div>';
+        searchResults.classList.remove('hidden');
+    }
+}
+
+function seleccionarEstacionDesdeBusqueda(id, nombre, tipo, lat, lng) {
+    const searchResults = document.getElementById('search-results');
+    const searchInput = document.getElementById('search-stations');
+
+    searchResults.classList.add('hidden');
+    searchInput.value = nombre;
+
+    agregarEstacionASelectores(id, nombre, tipo);
+    map.setView([lat, lng], 15);
+
+    if (!markers[id]) {
+        const tempMarker = L.circleMarker([lat, lng], {
+            radius: 10,
+            fillColor: COLORES[tipo] || '#666',
+            color: '#fff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.9
+        }).addTo(markersLayer);
+
+        tempMarker.bindPopup(`
+            <div class="font-semibold">${nombre}</div>
+            <div class="text-xs text-gray-600">${tipo.toUpperCase()} - ${id}</div>
+        `).openPopup();
+
+        markers[id] = tempMarker;
+    } else {
+        markers[id].openPopup();
+    }
+}
+
+function agregarEstacionASelectores(id, nombre, tipo) {
+    const selectOrigen = document.getElementById('select-origen');
+    const selectDestino = document.getElementById('select-destino');
+
+    const existeOrigen = Array.from(selectOrigen.options).some(opt => opt.value === id);
+    if (!existeOrigen) {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${nombre} (${tipo})`;
+        selectOrigen.appendChild(option);
+    }
+
+    const existeDestino = Array.from(selectDestino.options).some(opt => opt.value === id);
+    if (!existeDestino) {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${nombre} (${tipo})`;
+        selectDestino.appendChild(option);
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// =========================================================================
+// CONFIGURACIÓN DE EVENTOS Y CÁLCULOS
+// =========================================================================
+
+function configurarEventos() {
+    const btnCalcular = document.getElementById('btn-calcular-ruta');
+    const btnCongestion = document.getElementById('btn-analizar-congestion');
+    const selectOrigen = document.getElementById('select-origen');
+    const selectDestino = document.getElementById('select-destino');
+
+    if (!btnCalcular || !btnCongestion) return;
+
+    function actualizarBotones() {
+        const habilitado = selectOrigen.value && selectDestino.value;
+        btnCalcular.disabled = !habilitado;
+        btnCongestion.disabled = !habilitado;
+    }
+
+    selectOrigen.addEventListener('change', actualizarBotones);
+    selectDestino.addEventListener('change', actualizarBotones);
+    btnCalcular.addEventListener('click', calcularRutaOptima);
+    btnCongestion.addEventListener('click', analizarCongestion);
+}
+
+async function calcularRutaOptima() {
+    const origenId = document.getElementById('select-origen').value;
+    const destinoId = document.getElementById('select-destino').value;
+    const resultDiv = document.getElementById('dijkstra-result');
+
+    resultDiv.innerHTML = '<div class="text-blue-500">⏳ Calculando...</div>';
+
+    try {
+        const response = await fetch(`${API_URL}/ruta-optima?origenId=${origenId}&destinoId=${destinoId}`);
+        const resultado = await response.json();
+
+        resultDiv.innerHTML = `
+            <div class="bg-green-50 border border-green-200 rounded p-3">
+                <div class="font-semibold text-green-800">✅ Ruta encontrada</div>
+                <div class="text-sm text-gray-700 mt-2">
+                    <div>⏱ Tiempo: <span class="font-bold">${resultado.tiempoTotal} min</span></div>
+                    <div>🚏 Estaciones: ${resultado.numeroEstaciones}</div>
+                </div>
+            </div>
+        `;
+
+        await dibujarRutaOptima(resultado.camino);
+    } catch (error) {
+        console.error('Error:', error);
+        resultDiv.innerHTML = `<div class="text-red-500">❌ Error</div>`;
+    }
+}
+
+async function dibujarRutaOptima(camino) {
+    if (rutaLayer) {
+        rutaLayer.clearLayers();
+    } else {
+        rutaLayer = L.layerGroup().addTo(map);
+    }
+
+    if (!camino || camino.length < 2) return;
+
+    for (let i = 0; i < camino.length - 1; i++) {
+        const origen = camino[i];
+        const destino = camino[i + 1];
+
+        try {
+            const coords = `${origen.longitud},${origen.latitud};${destino.longitud},${destino.latitud}`;
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+
+            const response = await fetch(osrmUrl);
+            const data = await response.json();
+
+            if (data.routes && data.routes[0]) {
+                L.geoJSON(data.routes[0].geometry, {
+                    style: { color: '#4F46E5', weight: 4, opacity: 0.7 }
+                }).addTo(rutaLayer);
+            }
+        } catch (error) {
+            L.polyline([[origen.latitud, origen.longitud], [destino.latitud, destino.longitud]], {
+                color: '#4F46E5', weight: 4, opacity: 0.7
+            }).addTo(rutaLayer);
+        }
+    }
+
+    const bounds = L.latLngBounds(camino.map(e => [e.latitud, e.longitud]));
+    map.fitBounds(bounds, { padding: [50, 50] });
+}
+
+async function analizarCongestion() {
+    const origenId = document.getElementById('select-origen').value;
+    const destinoId = document.getElementById('select-destino').value;
+    const resultDiv = document.getElementById('congestion-result');
+
+    resultDiv.innerHTML = '<div class="text-blue-500">⏳ Analizando...</div>';
+
+    try {
+        const response = await fetch(`${API_URL}/analisis-congestion?origenId=${origenId}&destinoId=${destinoId}`);
+        const analisis = await response.json();
+
+        const nivelColor = analisis.nivelCongestion.color;
+        const nivel = analisis.nivelCongestion.nivel;
+
+        resultDiv.innerHTML = `
+            <div class="border rounded p-3" style="border-color: ${nivelColor}; background-color: ${nivelColor}15">
+                <div class="font-semibold mb-2" style="color: ${nivelColor}">🚦 ${nivel}</div>
+                <div class="text-sm text-gray-700 space-y-1">
+                    <div>📊 Normal: ${analisis.flujoNormal}</div>
+                    <div>⚠️ Hora pico: ${analisis.flujoHoraPico}</div>
+                    <div>📉 Reducción: ${analisis.porcentajeReduccion}%</div>
+                </div>
+            </div>
+        `;
+
+        if (analisis.cuellosBotella && analisis.cuellosBotella.length > 0) {
+            dibujarCuellosBotella(analisis.cuellosBotella);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        resultDiv.innerHTML = `<div class="text-red-500">❌ Error</div>`;
+    }
+}
+
+function dibujarCuellosBotella(cuellos) {
+    if (cuellosLayer) {
+        cuellosLayer.clearLayers();
+    } else {
+        cuellosLayer = L.layerGroup().addTo(map);
+    }
+
+    cuellos.forEach(cuello => {
+        const color = cuello.porcentajeUso > 85 ? '#991B1B' :
+                      cuello.porcentajeUso > 75 ? '#DC2626' : '#F59E0B';
+
+        const line = L.polyline([
+            [cuello.latitudOrigen, cuello.longitudOrigen],
+            [cuello.latitudDestino, cuello.longitudDestino]
+        ], {
+            color: color,
+            weight: 8,
+            opacity: 0.7,
+            dashArray: '10, 10'
+        }).addTo(cuellosLayer);
+
+        line.bindPopup(`
+            <div class="font-semibold text-red-700">🔴 Cuello de Botella</div>
+            <div class="text-sm mt-2">
+                <div>${cuello.origen.nombre} → ${cuello.destino.nombre}</div>
+                <div class="mt-1">Uso: ${cuello.porcentajeUso}%</div>
+            </div>
+        `);
+    });
+}
+
+// Iniciar aplicación
 document.addEventListener('DOMContentLoaded', init);

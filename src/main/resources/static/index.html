@@ -60,6 +60,13 @@
                     Ruta Óptima (Dijkstra)
                 </h2>
                 <div class="space-y-3">
+                    <!-- Buscador de Estaciones -->
+                    <div class="relative">
+                        <input id="search-stations" type="text" placeholder="🔍 Buscar estación..."
+                               class="w-full p-2 pl-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <div id="search-results" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden"></div>
+                    </div>
+
                     <select id="select-origen" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 select-custom">
                         <option value="" disabled selected>Seleccione Origen</option>
                     </select>
