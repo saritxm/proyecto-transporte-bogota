@@ -16,6 +16,7 @@ let markers = {};
 let markersLayer = L.layerGroup().addTo(map);
 let rutaLayer = null;
 let cuellosLayer = null;
+let rutasAlternativasLayers = [];
 
 // Colores por tipo de estación
 const COLORES = {
@@ -191,6 +192,8 @@ function showOnlyRouteStations(camino) {
 function resetMapLayers() {
     if (rutaLayer) { rutaLayer.clearLayers(); rutaLayer = null; }
     if (cuellosLayer) { cuellosLayer.clearLayers(); cuellosLayer = null; }
+    rutasAlternativasLayers.forEach(layer => map.removeLayer(layer));
+    rutasAlternativasLayers = [];
     dibujarEstaciones(estacionesPrincipales);
 }
 
@@ -475,6 +478,11 @@ async function analizarCongestion() {
             dibujarCuellosBotella(analisis.cuellosBotella);
         }
 
+        // Dibujar rutas alternativas si existen
+        if (analisis.rutasAlternativas?.length > 0) {
+            dibujarRutasAlternativas(analisis.rutasAlternativas);
+        }
+
         dibujarEstaciones(estacionesPrincipales);
 
     } catch (error) {
@@ -511,6 +519,121 @@ function dibujarCuellosBotella(cuellos) {
             </div>
         `).addTo(cuellosLayer);
     });
+}
+
+async function dibujarRutasAlternativas(rutas) {
+    console.log('Dibujando rutas alternativas:', rutas);
+
+    // Limpiar rutas anteriores
+    rutasAlternativasLayers.forEach(layer => map.removeLayer(layer));
+    rutasAlternativasLayers = [];
+
+    // Limpiar markers y mostrar solo estaciones de las rutas
+    markersLayer.clearLayers();
+    markers = {};
+
+    // Colores para rutas alternativas
+    const coloresRutas = [
+        '#2196F3',  // Azul (Ruta principal/más corta)
+        '#FF9800',  // Naranja (Ruta alternativa 1)
+        '#9C27B0'   // Púrpura (Ruta alternativa 2)
+    ];
+
+    // Dibujar cada ruta usando OSRM
+    for (let rutaIndex = 0; rutaIndex < rutas.length; rutaIndex++) {
+        const ruta = rutas[rutaIndex];
+        const color = coloresRutas[rutaIndex % coloresRutas.length];
+        const weight = rutaIndex === 0 ? 6 : 4;
+        const opacity = rutaIndex === 0 ? 0.8 : 0.6;
+        const dashArray = rutaIndex === 0 ? null : '10, 5';
+
+        // Dibujar segmentos de la ruta con OSRM
+        for (let i = 0; i < ruta.camino.length - 1; i++) {
+            const o = ruta.camino[i];
+            const d = ruta.camino[i + 1];
+            const coords = `${o.longitud},${o.latitud};${d.longitud},${d.latitud}`;
+
+            try {
+                const osrm = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+                const data = await osrm.json();
+
+                if (data.routes?.[0]) {
+                    const routeLayer = L.geoJSON(data.routes[0].geometry, {
+                        style: { color: color, weight: weight, opacity: opacity, dashArray: dashArray }
+                    });
+
+                    routeLayer.bindPopup(`
+                        <div class="text-sm">
+                            <div class="font-semibold" style="color: ${color}">
+                                ${rutaIndex === 0 ? '🔵 Ruta Principal' : `🔄 Ruta Alternativa ${rutaIndex}`}
+                            </div>
+                            <div class="mt-1">
+                                <div>⏱️ Tiempo: <strong>${ruta.tiempoTotal} min</strong></div>
+                                <div>📍 Estaciones: <strong>${ruta.numeroEstaciones}</strong></div>
+                            </div>
+                        </div>
+                    `);
+
+                    routeLayer.addTo(map);
+                    rutasAlternativasLayers.push(routeLayer);
+                }
+            } catch (error) {
+                // Fallback: línea recta si OSRM falla
+                const polyline = L.polyline([[o.latitud, o.longitud], [d.latitud, d.longitud]], {
+                    color: color,
+                    weight: weight,
+                    opacity: opacity,
+                    dashArray: dashArray
+                });
+
+                polyline.addTo(map);
+                rutasAlternativasLayers.push(polyline);
+            }
+        }
+
+        // Dibujar markers de estaciones SOLO para la primera ruta (principal)
+        if (rutaIndex === 0) {
+            ruta.camino.forEach((est, index) => {
+                const isInicio = index === 0;
+                const isFin = index === ruta.camino.length - 1;
+
+                let markerColor = COLORES[est.tipo] || '#4F46E5';
+                let radius = 8;
+
+                if (isInicio) {
+                    markerColor = '#22C55E'; // Verde para inicio
+                    radius = 10;
+                } else if (isFin) {
+                    markerColor = '#EF4444'; // Rojo para fin
+                    radius = 10;
+                }
+
+                const marker = L.circleMarker([est.latitud, est.longitud], {
+                    radius: radius,
+                    fillColor: markerColor,
+                    color: '#fff',
+                    weight: 2,
+                    fillOpacity: 0.9
+                });
+
+                marker.bindPopup(`
+                    <div class="font-semibold">${index + 1}. ${est.nombre}</div>
+                    <div class="text-xs text-gray-600">${est.tipo.toUpperCase()}</div>
+                    ${isInicio ? '<div class="text-xs font-bold text-green-600">🟢 INICIO</div>' : ''}
+                    ${isFin ? '<div class="text-xs font-bold text-red-600">🔴 DESTINO</div>' : ''}
+                `);
+
+                marker.addTo(markersLayer);
+                markers[est.id] = marker;
+            });
+        }
+    }
+
+    // Ajustar la vista del mapa para mostrar todas las rutas
+    if (rutasAlternativasLayers.length > 0) {
+        const bounds = L.latLngBounds(rutas[0].camino.map(e => [e.latitud, e.longitud]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
 }
 
 // =========================================================================

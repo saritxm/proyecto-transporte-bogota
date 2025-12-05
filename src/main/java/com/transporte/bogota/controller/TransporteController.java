@@ -192,9 +192,11 @@ public class TransporteController {
             }
 
             // Realizar análisis de congestión
+            // IMPORTANTE: NO usar grafo completo (7849 nodos causa OOM)
+            // Usar grafo lazy que solo carga nodos relevantes
             CongestionAnalysisService.AnalisisCongestion analisis =
                 congestionService.analizarCongestion(
-                    transporteService.getGrafoCompleto(),
+                    transporteService.construirGrafoLazy(origen, destino),
                     origen,
                     destino
                 );
@@ -215,8 +217,8 @@ public class TransporteController {
             respuesta.put("flujoHoraPico", analisis.flujoHoraPico);
             respuesta.put("porcentajeReduccion", Math.round(analisis.porcentajeReduccion * 100) / 100.0);
             respuesta.put("nivelCongestion", Map.of(
-                "nivel", analisis.nivel.nombre,
-                "color", analisis.nivel.color
+                "nivel", analisis.nivelCongestion.nombre,
+                "color", analisis.nivelCongestion.color
             ));
 
             // Cuellos de botella
@@ -243,10 +245,141 @@ public class TransporteController {
 
             respuesta.put("recomendaciones", analisis.recomendaciones);
 
+            // Incluir rutas alternativas si están disponibles
+            if (analisis.rutasAlternativas != null && !analisis.rutasAlternativas.isEmpty()) {
+                respuesta.put("rutasAlternativas", analisis.rutasAlternativas.stream()
+                    .limit(3)
+                    .map(ruta -> Map.of(
+                        "numeroRuta", ruta.numeroRuta,
+                        "tiempoTotal", Math.round(ruta.costoTotal * 10) / 10.0,
+                        "numeroEstaciones", ruta.getNumeroEstaciones(),
+                        "camino", ruta.camino.stream()
+                            .map(est -> Map.of(
+                                "id", est.getId(),
+                                "nombre", est.getNombre(),
+                                "tipo", est.getTipo(),
+                                "latitud", est.getLatitud(),
+                                "longitud", est.getLongitud()
+                            ))
+                            .toList()
+                    ))
+                    .toList()
+                );
+            }
+
             return ResponseEntity.ok(respuesta);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body("Error al analizar congestión: " + e.getMessage());
+        }
+    }
+
+    // =========================================================================
+    // ENDPOINT DE RUTAS ALTERNATIVAS CON BELLMAN-FORD
+    // =========================================================================
+
+    /**
+     * Encuentra rutas alternativas considerando congestión usando Bellman-Ford.
+     * Este algoritmo penaliza rutas con baja capacidad y encuentra alternativas óptimas.
+     * http://localhost:8080/api/transporte/rutas-alternativas?origenId=E013&destinoId=TM002&numRutas=3
+     */
+    @GetMapping("/rutas-alternativas")
+    public ResponseEntity<?> encontrarRutasAlternativas(
+            @RequestParam String origenId,
+            @RequestParam String destinoId,
+            @RequestParam(required = false, defaultValue = "3") int numRutas) {
+        try {
+            // Validar número de rutas
+            if (numRutas < 1) numRutas = 1;
+            if (numRutas > 5) numRutas = 5; // Máximo 5 rutas
+
+            // Obtener estaciones
+            Estacion origen = transporteService.getEstacionPorId(origenId);
+            Estacion destino = transporteService.getEstacionPorId(destinoId);
+
+            if (origen == null || destino == null) {
+                return ResponseEntity.badRequest().body("Estación no encontrada");
+            }
+
+            // Analizar rutas alternativas con Bellman-Ford
+            // IMPORTANTE: NO usar grafo completo (7849 nodos causa OOM)
+            // Usar grafo lazy que solo carga nodos relevantes
+            CongestionAnalysisService.AnalisisRutasAlternativas analisis =
+                congestionService.analizarRutasAlternativas(
+                    transporteService.construirGrafoLazy(origen, destino),
+                    origen,
+                    destino,
+                    numRutas
+                );
+
+            // Construir respuesta
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("origen", Map.of(
+                "id", origen.getId(),
+                "nombre", origen.getNombre(),
+                "tipo", origen.getTipo()
+            ));
+            respuesta.put("destino", Map.of(
+                "id", destino.getId(),
+                "nombre", destino.getNombre(),
+                "tipo", destino.getTipo()
+            ));
+            respuesta.put("mensaje", analisis.mensaje);
+            respuesta.put("tieneCicloNegativo", analisis.tieneCicloNegativo);
+
+            // Si hay ciclo negativo, informarlo
+            if (analisis.tieneCicloNegativo && analisis.cicloNegativo != null) {
+                respuesta.put("cicloNegativo", analisis.cicloNegativo.stream()
+                    .map(est -> Map.of(
+                        "id", est.getId(),
+                        "nombre", est.getNombre()
+                    ))
+                    .toList()
+                );
+            }
+
+            // Rutas encontradas
+            respuesta.put("totalRutas", analisis.rutas.size());
+            respuesta.put("rutas", analisis.rutas.stream()
+                .map(analisisRuta -> {
+                    Map<String, Object> rutaMap = new HashMap<>();
+                    rutaMap.put("numero", analisisRuta.ruta.numeroRuta);
+                    rutaMap.put("tiempoTotal", Math.round(analisisRuta.ruta.costoTotal * 10) / 10.0);
+                    rutaMap.put("numeroEstaciones", analisisRuta.ruta.getNumeroEstaciones());
+                    rutaMap.put("nivelCongestion", Math.round(analisisRuta.nivelCongestion * 100));
+                    rutaMap.put("transferencias", analisisRuta.transferencias);
+                    rutaMap.put("puntuacion", Math.round(analisisRuta.puntuacion * 100));
+                    rutaMap.put("descripcion", analisisRuta.getDescripcion());
+                    rutaMap.put("camino", analisisRuta.ruta.camino.stream()
+                        .map(est -> Map.of(
+                            "id", est.getId(),
+                            "nombre", est.getNombre(),
+                            "tipo", est.getTipo(),
+                            "latitud", est.getLatitud(),
+                            "longitud", est.getLongitud()
+                        ))
+                        .toList()
+                    );
+                    return rutaMap;
+                })
+                .toList()
+            );
+
+            // Recomendación de mejor ruta
+            if (!analisis.rutas.isEmpty()) {
+                CongestionAnalysisService.AnalisisRuta mejorRuta = analisis.rutas.get(0);
+                respuesta.put("mejorRuta", Map.of(
+                    "numero", mejorRuta.ruta.numeroRuta,
+                    "razon", "Mejor balance entre tiempo, congestión y transferencias",
+                    "puntuacion", Math.round(mejorRuta.puntuacion * 100)
+                ));
+            }
+
+            return ResponseEntity.ok(respuesta);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                .body("Error al encontrar rutas alternativas: " + e.getMessage());
         }
     }
 }

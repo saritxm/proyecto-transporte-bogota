@@ -358,6 +358,18 @@ public class TransporteService {
         return grafoCompleto;
     }
 
+    /**
+     * Construye un grafo lazy (carga perezosa) con solo los nodos relevantes
+     * entre origen y destino. MUCHO más eficiente que getGrafoCompleto().
+     *
+     * @param origen Estación origen
+     * @param destino Estación destino
+     * @return Grafo optimizado con solo nodos alcanzables
+     */
+    public Graph construirGrafoLazy(Estacion origen, Estacion destino) {
+        return lazyGraphService.construirGrafoLazy(origen, destino);
+    }
+
     public SistemaTransporte getSistema() {
         return sistema;
     }
