@@ -171,7 +171,6 @@ El sistema integra datos reales de **7,849 estaciones SITP** y **portales/estaci
 | **Bellman-Ford** | O(V × E) | Rutas alternativas + detección de ciclos |
 | **Edmonds-Karp** | O(V × E²) | Flujo máximo + cuellos de botella |
 | **Kruskal** | O(E log E) | Árbol de recubrimiento mínimo |
-| **Graph Coloring** | O(V²) | Asignación de recursos |
 
 #### 5. **Capa de Modelos de Datos**
 - **Estacion:** Representa estaciones (Metro, TM, SITP)
@@ -573,17 +572,6 @@ KRUSKAL(grafo):
 
     retornar mst
 ```
-
-### 5. Graph Coloring (Coloreado de Grafos)
-
-**Archivo:** `src/main/java/com/transporte/bogota/algorithm/GraphColoring.java`
-
-#### Descripción
-Algoritmo greedy para asignar colores a nodos. Útil para asignación de frecuencias de servicio.
-
-#### Complejidad
-- **Tiempo:** O(V²)
-- **Espacio:** O(V)
 
 ---
 
@@ -1924,7 +1912,6 @@ Penalización efectiva: Aristas de Ruta 1 penalizadas en +1,000%
 | **Bellman-Ford** | Custom con optimizaciones | O(V×E) | ~300 LOC |
 | **Edmonds-Karp** | Custom con BFS | O(V×E²) | ~200 LOC |
 | **Kruskal** | Custom con Union-Find | O(E log E) | ~180 LOC |
-| **Graph Coloring** | Greedy | O(V²) | ~100 LOC |
 
 ### Herramientas de Desarrollo
 
@@ -2071,6 +2058,97 @@ proyecto-transporte-bogota/
 - Leaflet.js: [https://leafletjs.com/](https://leafletjs.com/)
 - OSRM: [http://project-osrm.org/](http://project-osrm.org/)
 
+---
+
+## 🔮 Trabajo Futuro
+
+### Algoritmo Implementado pero No Integrado: Graph Coloring
+
+El sistema incluye una implementación de **Graph Coloring (Coloreado de Grafos)** que actualmente **no tiene uso práctico en producción**, pero está disponible para futuras mejoras.
+
+**Archivo:** `src/main/java/com/transporte/bogota/algorithm/GraphColoring.java`
+
+**Estado:** ⚠️ **Implementado pero sin uso real**
+
+**Algoritmo:** Welsh-Powell (heurística greedy)
+
+**Complejidad:** O(V²)
+
+**Situación actual:**
+- Solo se ejecuta al inicio del sistema para generar una estadística
+- Los resultados **no se exponen** en ningún endpoint REST
+- **No aparece** en el frontend
+- Está coloreando el grafo de **rutas** (incorrecto), cuando debería colorear un grafo de **conflictos**
+- Los colores calculados se guardan en memoria pero **nunca se usan**
+
+**¿Por qué no está integrado?**
+
+Para que Graph Coloring sea útil en el sistema, se necesitaría:
+1. **Definir qué es un "conflicto"** en el contexto de transporte
+2. **Construir un grafo de conflictos** (no el grafo de rutas actual)
+3. **Crear casos de uso reales** (asignar horarios, andenes, recursos)
+4. **Integrar con la API REST y frontend**
+
+**Uso potencial futuro:**
+
+**Caso de Uso 1: Asignación de Franjas Horarias**
+
+```java
+// Crear grafo de conflictos: buses que no pueden salir simultáneamente
+// porque comparten la misma estación/andén
+Graph grafoConflictos = new Graph();
+
+for (Bus bus1 : buses) {
+    for (Bus bus2 : buses) {
+        if (usanMismoAndenAlMismoTiempo(bus1, bus2)) {
+            // Arista = conflicto
+            grafoConflictos.addArista(bus1.getEstacion(), bus2.getEstacion(), 0, 0);
+        }
+    }
+}
+
+// Colorear para asignar franjas horarias sin conflictos
+Map<Estacion, Integer> franjas = GraphColoring.colorearGrafo(grafoConflictos);
+
+// Interpretación de colores:
+// Color 1 = Franja 6:00-7:00
+// Color 2 = Franja 7:00-8:00
+// Color 3 = Franja 8:00-9:00
+// etc.
+```
+
+**Caso de Uso 2: Asignación de Andenes**
+
+```java
+// Grafo de conflictos: estaciones que necesitan andenes simultáneamente
+Graph grafoAndenes = construirGrafoConflictosAndenes();
+Map<Estacion, Integer> andenes = GraphColoring.colorearGrafo(grafoAndenes);
+
+// Interpretación:
+// Color 1 = Andén A
+// Color 2 = Andén B
+// Color 3 = Andén C
+```
+
+**Caso de Uso 3: Asignación de Frecuencias de Radio**
+
+```java
+// Buses cercanos necesitan frecuencias diferentes para evitar interferencia
+Graph grafoRadio = construirGrafoInterferenciaRadio();
+Map<Estacion, Integer> frecuencias = GraphColoring.colorearGrafo(grafoRadio);
+```
+
+**Requisitos para implementar:**
+1. Definir modelo de datos para horarios/turnos/recursos
+2. Construir grafo de conflictos basado en superposiciones
+3. Crear endpoint REST `/api/asignacion-recursos`
+4. Integrar con frontend para visualizar asignaciones
+5. Validar que minimiza el número de recursos necesarios
+
+**Beneficio esperado:**
+- Minimizar número de franjas horarias necesarias
+- Minimizar número de andenes requeridos
+- Optimizar uso de recursos compartidos
 
 ### Mejoras Planificadas
 
@@ -2102,9 +2180,15 @@ proyecto-transporte-bogota/
    - Métricas en tiempo real
    - Visualización de flujos
 
+8. **Integración Real de Graph Coloring**
+   - Implementar grafo de conflictos
+   - Asignación de franjas horarias
+   - Asignación de andenes
+   - Endpoint REST funcional
+
 ---
 
 **Desarrollado para la optimización del sistema de transporte público de Bogotá** 🚇🚌🚎
 
-**Algoritmos implementados:** Dijkstra | Bellman-Ford | Edmonds-Karp | Kruskal | Graph Coloring
+**Algoritmos implementados:** Dijkstra | Bellman-Ford | Edmonds-Karp | Kruskal | Árbol B+
 **Datos reales:** 7,849 paraderos SITP | Portal de Datos Abiertos TransMilenio
